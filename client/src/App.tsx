@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Dashboard from "./pages/Dashboard";
+import SmartPreAuth from "./pages/SmartPreAuth";
 
 function Router() {
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path={"/analytics"} component={Dashboard} />
       <Route path={"/predictions"} component={Dashboard} />
       <Route path={"/settings"} component={Dashboard} />
+      <Route path={"/pre-auth"} component={SmartPreAuth} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

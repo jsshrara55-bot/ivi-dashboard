@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Activity, BarChart3, Home, LayoutDashboard, Settings, Users } from "lucide-react";
+import { Activity, BarChart3, Home, LayoutDashboard, Settings, ShieldCheck, Users } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 interface DashboardLayoutProps {
@@ -14,6 +14,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Clients', href: '/clients', icon: Users },
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     { name: 'Predictions', href: '/predictions', icon: Activity },
+    { name: 'Smart Pre-Auth', href: '/pre-auth', icon: ShieldCheck },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
