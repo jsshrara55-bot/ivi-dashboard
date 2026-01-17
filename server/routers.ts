@@ -448,7 +448,7 @@ export const appRouter = router({
 
     // Data Management (Admin only)
     data: router({
-      checkExists: adminProcedure.query(async () => {
+      checkExists: publicProcedure.query(async () => {
         return checkDataExists();
       }),
 

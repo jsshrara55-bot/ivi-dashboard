@@ -21,6 +21,9 @@ export async function fetchCsvData<T>(url: string): Promise<T[]> {
 
 export interface IVIScore {
   CONT_NO: string;
+  Company_Name?: string;
+  Sector?: string;
+  Region?: string;
   H_score: number;
   E_score: number;
   U_score: number;

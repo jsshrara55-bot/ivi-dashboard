@@ -723,10 +723,26 @@ export async function getIviSummary() {
 
 export async function checkDataExists() {
   const db = await getDb();
-  if (!db) return false;
+  if (!db) return { hasData: false, counts: { corporateClients: 0, members: 0, claims: 0, providers: 0, iviScores: 0 } };
   
-  const existing = await db.select({ count: count() }).from(iviScores);
-  return (existing[0]?.count || 0) > 0;
+  const [clientsCount] = await db.select({ count: count() }).from(corporateClients);
+  const [membersCount] = await db.select({ count: count() }).from(members);
+  const [claimsCount] = await db.select({ count: count() }).from(claims);
+  const [providersCount] = await db.select({ count: count() }).from(providers);
+  const [iviCount] = await db.select({ count: count() }).from(iviScores);
+  
+  const counts = {
+    corporateClients: clientsCount?.count || 0,
+    members: membersCount?.count || 0,
+    claims: claimsCount?.count || 0,
+    providers: providersCount?.count || 0,
+    iviScores: iviCount?.count || 0,
+  };
+  
+  return {
+    hasData: (iviCount?.count || 0) > 0,
+    counts,
+  };
 }
 
 export async function clearAllIviData() {
