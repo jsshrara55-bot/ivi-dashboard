@@ -24,6 +24,34 @@ import {
   createChecklistItem,
   getChecklistItemsByRequestId,
   seedInitialData,
+  // IVI Data functions
+  getAllCorporateClients,
+  getCorporateClientByContNo,
+  getAllMembers,
+  getMembersByContNo,
+  getAllProviders,
+  getProviderStats,
+  getAllClaims,
+  getClaimsByContNo,
+  getClaimsStats,
+  getAllInsurancePreAuths,
+  getInsurancePreAuthsByContNo,
+  getPreAuthStats,
+  getAllCalls,
+  getCallsByContNo,
+  getCallStats,
+  getAllIviScores,
+  getIviScoreByContNo,
+  getIviSummary,
+  checkDataExists,
+  clearAllIviData,
+  bulkInsertCorporateClients,
+  bulkInsertMembers,
+  bulkInsertProviders,
+  bulkInsertClaims,
+  bulkInsertInsurancePreAuths,
+  bulkInsertCalls,
+  bulkInsertIviScores,
 } from "./db";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
@@ -308,6 +336,162 @@ export const appRouter = router({
 
         return getDocumentsByRequestId(input.requestId);
       }),
+  }),
+
+  // ==================== IVI Data API ====================
+  ivi: router({
+    // Summary and Overview
+    summary: publicProcedure.query(async () => {
+      return getIviSummary();
+    }),
+
+    // IVI Scores
+    scores: router({
+      list: publicProcedure.query(async () => {
+        return getAllIviScores();
+      }),
+
+      getByContNo: publicProcedure
+        .input(z.object({ contNo: z.string() }))
+        .query(async ({ input }) => {
+          return getIviScoreByContNo(input.contNo);
+        }),
+    }),
+
+    // Corporate Clients
+    clients: router({
+      list: publicProcedure.query(async () => {
+        return getAllCorporateClients();
+      }),
+
+      getByContNo: publicProcedure
+        .input(z.object({ contNo: z.string() }))
+        .query(async ({ input }) => {
+          return getCorporateClientByContNo(input.contNo);
+        }),
+    }),
+
+    // Members
+    members: router({
+      list: publicProcedure.query(async () => {
+        return getAllMembers();
+      }),
+
+      getByContNo: publicProcedure
+        .input(z.object({ contNo: z.string() }))
+        .query(async ({ input }) => {
+          return getMembersByContNo(input.contNo);
+        }),
+    }),
+
+    // Providers
+    providers: router({
+      list: publicProcedure.query(async () => {
+        return getAllProviders();
+      }),
+
+      stats: publicProcedure.query(async () => {
+        return getProviderStats();
+      }),
+    }),
+
+    // Claims
+    claims: router({
+      list: publicProcedure.query(async () => {
+        return getAllClaims();
+      }),
+
+      getByContNo: publicProcedure
+        .input(z.object({ contNo: z.string() }))
+        .query(async ({ input }) => {
+          return getClaimsByContNo(input.contNo);
+        }),
+
+      stats: publicProcedure.query(async () => {
+        return getClaimsStats();
+      }),
+    }),
+
+    // Insurance Pre-Authorizations
+    insurancePreAuths: router({
+      list: publicProcedure.query(async () => {
+        return getAllInsurancePreAuths();
+      }),
+
+      getByContNo: publicProcedure
+        .input(z.object({ contNo: z.string() }))
+        .query(async ({ input }) => {
+          return getInsurancePreAuthsByContNo(input.contNo);
+        }),
+
+      stats: publicProcedure.query(async () => {
+        return getPreAuthStats();
+      }),
+    }),
+
+    // Call Center
+    calls: router({
+      list: publicProcedure.query(async () => {
+        return getAllCalls();
+      }),
+
+      getByContNo: publicProcedure
+        .input(z.object({ contNo: z.string() }))
+        .query(async ({ input }) => {
+          return getCallsByContNo(input.contNo);
+        }),
+
+      stats: publicProcedure.query(async () => {
+        return getCallStats();
+      }),
+    }),
+
+    // Data Management (Admin only)
+    data: router({
+      checkExists: adminProcedure.query(async () => {
+        return checkDataExists();
+      }),
+
+      clearAll: adminProcedure.mutation(async () => {
+        await clearAllIviData();
+        return { success: true };
+      }),
+
+      importFromJson: adminProcedure
+        .input(z.object({
+          corporateClients: z.array(z.any()).optional(),
+          members: z.array(z.any()).optional(),
+          providers: z.array(z.any()).optional(),
+          claims: z.array(z.any()).optional(),
+          insurancePreAuths: z.array(z.any()).optional(),
+          calls: z.array(z.any()).optional(),
+          iviScores: z.array(z.any()).optional(),
+        }))
+        .mutation(async ({ input }) => {
+          if (input.corporateClients?.length) {
+            await bulkInsertCorporateClients(input.corporateClients);
+          }
+          if (input.members?.length) {
+            await bulkInsertMembers(input.members);
+          }
+          if (input.providers?.length) {
+            await bulkInsertProviders(input.providers);
+          }
+          if (input.claims?.length) {
+            await bulkInsertClaims(input.claims);
+          }
+          if (input.insurancePreAuths?.length) {
+            await bulkInsertInsurancePreAuths(input.insurancePreAuths);
+          }
+          if (input.calls?.length) {
+            await bulkInsertCalls(input.calls);
+          }
+          if (input.iviScores?.length) {
+            await bulkInsertIviScores(input.iviScores);
+          }
+          return { success: true };
+        }),
+    }),
   }),
 });
 

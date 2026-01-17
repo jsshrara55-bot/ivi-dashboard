@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Dashboard from "./pages/Dashboard";
 import SmartPreAuth from "./pages/SmartPreAuth";
 import AdminPanel from "./pages/AdminPanel";
+import DataExplorer from "./pages/DataExplorer";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -19,6 +20,7 @@ function Router() {
       <Route path={"/settings"} component={Dashboard} />
       <Route path={"/pre-auth"} component={SmartPreAuth} />
       <Route path={"/admin"} component={AdminPanel} />
+      <Route path={"/data-explorer"} component={DataExplorer} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

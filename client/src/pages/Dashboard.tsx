@@ -3,7 +3,8 @@ import { FeatureImportanceChart, IVITrendChart, KPICard, RiskDistributionChart, 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FeatureImportance, fetchCsvData, FuturePrediction, IVIScore, Recommendation } from "@/lib/csv";
-import { Activity, AlertTriangle, BarChart3, TrendingUp, Users } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { Activity, AlertTriangle, BarChart3, Building2, FileText, Phone, TrendingUp, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Dashboard() {
@@ -12,6 +13,13 @@ export default function Dashboard() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [featureImportance, setFeatureImportance] = useState<FeatureImportance[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Fetch summary from API
+  const { data: iviSummary } = trpc.ivi.summary.useQuery();
+  const { data: claimsStats } = trpc.ivi.claims.stats.useQuery();
+  const { data: callStats } = trpc.ivi.calls.stats.useQuery();
+  const { data: preAuthStats } = trpc.ivi.insurancePreAuths.stats.useQuery();
+  const { data: providerStats } = trpc.ivi.providers.stats.useQuery();
 
   useEffect(() => {
     async function loadData() {
@@ -45,20 +53,20 @@ export default function Dashboard() {
     );
   }
 
-  // Calculate Summary Metrics
-  const totalCompanies = iviScores.length;
-  const avgIVI = iviScores.reduce((sum, item) => sum + item.IVI_Score, 0) / totalCompanies;
+  // Calculate Summary Metrics - with safe defaults
+  const totalCompanies = iviScores.length || 1; // Prevent division by zero
+  const avgIVI = iviScores.length > 0 ? iviScores.reduce((sum, item) => sum + (item.IVI_Score || 0), 0) / totalCompanies : 0;
   const highRiskCount = iviScores.filter(item => item.Risk_Category === 'High Risk').length;
   const mediumRiskCount = iviScores.filter(item => item.Risk_Category === 'Medium Risk').length;
   const lowRiskCount = iviScores.filter(item => item.Risk_Category === 'Low Risk').length;
   
-  const avgH = iviScores.reduce((sum, item) => sum + item.H_score, 0) / totalCompanies;
-  const avgE = iviScores.reduce((sum, item) => sum + item.E_score, 0) / totalCompanies;
-  const avgU = iviScores.reduce((sum, item) => sum + item.U_score, 0) / totalCompanies;
+  const avgH = iviScores.length > 0 ? iviScores.reduce((sum, item) => sum + (item.H_score || 0), 0) / totalCompanies : 0;
+  const avgE = iviScores.length > 0 ? iviScores.reduce((sum, item) => sum + (item.E_score || 0), 0) / totalCompanies : 0;
+  const avgU = iviScores.length > 0 ? iviScores.reduce((sum, item) => sum + (item.U_score || 0), 0) / totalCompanies : 0;
   
-  const avgFutureIVI = futurePredictions.reduce((sum, item) => sum + item.Future_IVI_Score, 0) / totalCompanies;
+  const avgFutureIVI = futurePredictions.length > 0 ? futurePredictions.reduce((sum, item) => sum + (item.Future_IVI_Score || 0), 0) / (futurePredictions.length || 1) : 0;
   const improvement = avgFutureIVI - avgIVI;
-  const improvementPercent = (improvement / avgIVI) * 100;
+  const improvementPercent = avgIVI > 0 ? (improvement / avgIVI) * 100 : 0;
 
   const riskData = [
     { name: 'High Risk', value: highRiskCount, color: 'var(--destructive)' },
@@ -70,6 +78,13 @@ export default function Dashboard() {
     { name: 'Average', H_score: avgH, E_score: avgE, U_score: avgU }
   ];
 
+  // Format large numbers
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toFixed(0);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -80,7 +95,7 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* KPI Cards */}
+        {/* Primary KPI Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <KPICard 
             title="Total Companies" 
@@ -110,6 +125,70 @@ export default function Dashboard() {
             description="Next 12 months"
             className="bg-primary/5"
           />
+        </div>
+
+        {/* Secondary KPI Cards - Data Statistics */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <Card className="swiss-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Claims</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatNumber(Number(claimsStats?.totalClaims || 0))}</div>
+              <p className="text-xs text-muted-foreground">
+                SAR {formatNumber(Number(claimsStats?.totalClaimed || 0))} claimed
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="swiss-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Approved Amount</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">SAR {formatNumber(Number(claimsStats?.totalApproved || 0))}</div>
+              <p className="text-xs text-muted-foreground">
+                {claimsStats?.totalClaimed ? ((Number(claimsStats.totalApproved) / Number(claimsStats.totalClaimed)) * 100).toFixed(1) : 0}% approval rate
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="swiss-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Call Center</CardTitle>
+              <Phone className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatNumber(Number(callStats?.total || 0))}</div>
+              <p className="text-xs text-muted-foreground">
+                Avg satisfaction: {Number(callStats?.avgSatisfaction || 0).toFixed(1)}/5
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="swiss-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pre-Authorizations</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatNumber(Number(preAuthStats?.total || 0))}</div>
+              <p className="text-xs text-muted-foreground">
+                SAR {formatNumber(Number(preAuthStats?.totalCost || 0))} estimated
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="swiss-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Providers</CardTitle>
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatNumber(providerStats?.total || 0)}</div>
+              <p className="text-xs text-muted-foreground">
+                Healthcare facilities
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4">
@@ -145,6 +224,31 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
+            
+            {/* Claims Status Distribution */}
+            {claimsStats?.byStatus && (
+              <Card className="swiss-card">
+                <CardHeader>
+                  <CardTitle>Claims Status Distribution</CardTitle>
+                  <CardDescription>
+                    Breakdown of claims by approval status
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {claimsStats.byStatus.map((status) => (
+                      <div key={status.status} className="text-center p-4 rounded-lg bg-muted/50">
+                        <div className="text-2xl font-bold">{formatNumber(Number(status.count))}</div>
+                        <div className="text-sm text-muted-foreground">{status.status}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          SAR {formatNumber(Number(status.amount || 0))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             
             <Card className="swiss-card">
               <CardHeader>
@@ -192,10 +296,10 @@ export default function Dashboard() {
                               {client.Risk_Category}
                             </span>
                           </td>
-                          <td className="p-4 align-middle text-right">{client.H_score.toFixed(1)}</td>
-                          <td className="p-4 align-middle text-right">{client.E_score.toFixed(1)}</td>
-                          <td className="p-4 align-middle text-right">{client.U_score.toFixed(1)}</td>
-                          <td className="p-4 align-middle text-right font-bold">{client.IVI_Score.toFixed(1)}</td>
+                          <td className="p-4 align-middle text-right">{(client.H_score || 0).toFixed(1)}</td>
+                          <td className="p-4 align-middle text-right">{(client.E_score || 0).toFixed(1)}</td>
+                          <td className="p-4 align-middle text-right">{(client.U_score || 0).toFixed(1)}</td>
+                          <td className="p-4 align-middle text-right font-bold">{(client.IVI_Score || 0).toFixed(1)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -230,13 +334,13 @@ export default function Dashboard() {
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-center">
                       <CardTitle className="text-lg">{rec.CONT_NO}</CardTitle>
-                      <span className="text-sm font-medium text-muted-foreground">IVI: {rec.IVI_Score.toFixed(1)}</span>
+                      <span className="text-sm font-medium text-muted-foreground">IVI: {(rec.IVI_Score || 0).toFixed(1)}</span>
                     </div>
                     <CardDescription>{rec.Risk_Category}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {rec.Recommendations.split('|').map((action, i) => (
+                      {(rec.Recommendations || '').split('|').map((action, i) => (
                         <span key={i} className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground ring-1 ring-inset ring-gray-500/10">
                           {action.trim()}
                         </span>

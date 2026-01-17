@@ -1,0 +1,86 @@
+{
+  "tables": [
+    {
+      "name": "IVI_Scores",
+      "columns": [
+        "CONT_NO",
+        "COMPANY_NAME",
+        "SECTOR",
+        "REGION",
+        "EMPLOYEE_COUNT",
+        "TOTAL_CLAIMS",
+        "TOTAL_CLAIMED",
+        "TOTAL_APPROVED",
+        "H_SCORE",
+        "E_SCORE",
+        "U_SCORE",
+        "IVI_SCORE",
+        "RISK_CATEGORY",
+        "CHRONIC_RATE",
+        "COMPLAINT_RATE",
+        "REJECTION_RATE",
+        "LOSS_RATIO"
+      ],
+      "description": "Main fact table containing IVI scores for each company"
+    },
+    {
+      "name": "Future_Predictions",
+      "columns": [
+        "CONT_NO",
+        "IVI_Score",
+        "Risk_Category",
+        "Retained",
+        "Improvement_Factor",
+        "Future_IVI_Score",
+        "Future_Retention_Probability"
+      ],
+      "description": "Predicted future IVI scores and improvements"
+    },
+    {
+      "name": "Recommendations",
+      "columns": [
+        "CONT_NO",
+        "Risk_Category",
+        "IVI_Score",
+        "Recommendations"
+      ],
+      "description": "Recommended actions for each company"
+    },
+    {
+      "name": "Feature_Importance",
+      "columns": [
+        "Feature",
+        "Importance"
+      ],
+      "description": "Feature importance for IVI model"
+    },
+    {
+      "name": "Provider_Info",
+      "columns": [
+        "Prov Code",
+        "Prov Name",
+        "Provider Network",
+        "Provider Practice",
+        "Provider Region",
+        "Provider Town"
+      ],
+      "description": "Healthcare provider information"
+    }
+  ],
+  "relationships": [
+    {
+      "from_table": "Future_Predictions",
+      "from_column": "CONT_NO",
+      "to_table": "IVI_Scores",
+      "to_column": "CONT_NO",
+      "cardinality": "Many-to-One"
+    },
+    {
+      "from_table": "Recommendations",
+      "from_column": "CONT_NO",
+      "to_table": "IVI_Scores",
+      "to_column": "CONT_NO",
+      "cardinality": "Many-to-One"
+    }
+  ]
+}

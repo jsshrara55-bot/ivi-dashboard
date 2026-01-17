@@ -1,6 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { Activity, BarChart3, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users } from "lucide-react";
+import { Activity, BarChart3, Database, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 import { Button } from "./ui/button";
@@ -19,6 +19,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     { name: 'Predictions', href: '/predictions', icon: Activity },
     { name: 'Smart Pre-Auth', href: '/pre-auth', icon: ShieldCheck },
+    { name: 'Data Explorer', href: '/data-explorer', icon: Database },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 

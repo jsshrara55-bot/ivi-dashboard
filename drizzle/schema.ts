@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, decimal, date } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -125,3 +125,184 @@ export const requestChecklistItems = mysqlTable("request_checklist_items", {
 
 export type RequestChecklistItem = typeof requestChecklistItems.$inferSelect;
 export type InsertRequestChecklistItem = typeof requestChecklistItems.$inferInsert;
+
+// ============================================================
+// IVI DATA TABLES - Based on Data Dictionary
+// ============================================================
+
+/**
+ * Corporate Clients - الشركات العميلة
+ * Stores corporate client information with contracts
+ */
+export const corporateClients = mysqlTable("corporate_clients", {
+  id: int("id").autoincrement().primaryKey(),
+  contNo: varchar("contNo", { length: 50 }).notNull().unique(),
+  companyName: varchar("companyName", { length: 255 }).notNull(),
+  sector: varchar("sector", { length: 100 }),
+  region: varchar("region", { length: 100 }),
+  network: varchar("network", { length: 20 }),
+  employeeCount: int("employeeCount"),
+  contractStart: date("contractStart"),
+  contractEnd: date("contractEnd"),
+  premiumAmount: decimal("premiumAmount", { precision: 15, scale: 2 }),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CorporateClient = typeof corporateClients.$inferSelect;
+export type InsertCorporateClient = typeof corporateClients.$inferInsert;
+
+/**
+ * Members - الأعضاء المؤمن عليهم
+ * Stores member/employee information
+ */
+export const members = mysqlTable("members", {
+  id: int("id").autoincrement().primaryKey(),
+  mbrNo: varchar("mbrNo", { length: 50 }).notNull().unique(),
+  contNo: varchar("contNo", { length: 50 }).notNull(),
+  gender: varchar("gender", { length: 10 }),
+  age: int("age"),
+  maritalStatus: varchar("maritalStatus", { length: 10 }),
+  nationality: varchar("nationality", { length: 50 }),
+  city: varchar("city", { length: 100 }),
+  planNetwork: varchar("planNetwork", { length: 20 }),
+  hasChronic: boolean("hasChronic").default(false),
+  chronicConditions: text("chronicConditions"),
+  enrollmentDate: date("enrollmentDate"),
+  status: mysqlEnum("memberStatus", ["Active", "Suspended", "Terminated"]).default("Active"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Member = typeof members.$inferSelect;
+export type InsertMember = typeof members.$inferInsert;
+
+/**
+ * Providers - مقدمي الخدمات الصحية
+ * Stores healthcare provider information
+ */
+export const providers = mysqlTable("providers", {
+  id: int("id").autoincrement().primaryKey(),
+  provCode: varchar("provCode", { length: 50 }).notNull().unique(),
+  provName: varchar("provName", { length: 255 }).notNull(),
+  providerNetwork: varchar("providerNetwork", { length: 20 }),
+  providerPractice: varchar("providerPractice", { length: 100 }),
+  providerRegion: varchar("providerRegion", { length: 100 }),
+  providerTown: varchar("providerTown", { length: 100 }),
+  areaCode: varchar("areaCode", { length: 20 }),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Provider = typeof providers.$inferSelect;
+export type InsertProvider = typeof providers.$inferInsert;
+
+/**
+ * Claims - المطالبات
+ * Stores insurance claims data
+ */
+export const claims = mysqlTable("claims", {
+  id: int("id").autoincrement().primaryKey(),
+  claimId: varchar("claimId", { length: 50 }).notNull().unique(),
+  mbrNo: varchar("mbrNo", { length: 50 }).notNull(),
+  contNo: varchar("contNo", { length: 50 }).notNull(),
+  provCode: varchar("provCode", { length: 50 }),
+  claimDate: date("claimDate"),
+  icdCode: varchar("icdCode", { length: 20 }),
+  diagnosis: varchar("diagnosis", { length: 255 }),
+  benefitCode: varchar("benefitCode", { length: 20 }),
+  benefitDesc: varchar("benefitDesc", { length: 255 }),
+  claimedAmount: decimal("claimedAmount", { precision: 12, scale: 2 }),
+  approvedAmount: decimal("approvedAmount", { precision: 12, scale: 2 }),
+  status: mysqlEnum("claimStatus", ["Approved", "Rejected", "Pending", "Partially Approved"]).default("Pending"),
+  rejectionReason: text("rejectionReason"),
+  processingDays: int("processingDays"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Claim = typeof claims.$inferSelect;
+export type InsertClaim = typeof claims.$inferInsert;
+
+/**
+ * Pre-Authorizations (Insurance) - الموافقات المسبقة للتأمين
+ * Stores pre-authorization requests for sensitive medications
+ */
+export const insurancePreAuths = mysqlTable("insurance_pre_auths", {
+  id: int("id").autoincrement().primaryKey(),
+  preauthId: varchar("preauthId", { length: 50 }).notNull().unique(),
+  mbrNo: varchar("mbrNo", { length: 50 }).notNull(),
+  contNo: varchar("contNo", { length: 50 }).notNull(),
+  provCode: varchar("provCode", { length: 50 }),
+  medicationName: varchar("medicationName", { length: 255 }),
+  medicationCategory: varchar("medicationCategory", { length: 100 }),
+  estimatedCost: decimal("estimatedCost", { precision: 12, scale: 2 }),
+  requestDate: date("requestDate"),
+  docsSubmitted: text("docsSubmitted"),
+  docsComplete: boolean("docsComplete").default(false),
+  status: mysqlEnum("preauthStatus", ["Approved", "Rejected", "Pending"]).default("Pending"),
+  decisionDate: date("decisionDate"),
+  rejectionReason: text("rejectionReason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type InsurancePreAuth = typeof insurancePreAuths.$inferSelect;
+export type InsertInsurancePreAuth = typeof insurancePreAuths.$inferInsert;
+
+/**
+ * Call Center Interactions - تفاعلات مركز الاتصال
+ * Stores customer service call records
+ */
+export const callCenterCalls = mysqlTable("call_center_calls", {
+  id: int("id").autoincrement().primaryKey(),
+  callId: varchar("callId", { length: 50 }).notNull().unique(),
+  mbrNo: varchar("mbrNo", { length: 50 }).notNull(),
+  contNo: varchar("contNo", { length: 50 }).notNull(),
+  callCat: varchar("callCat", { length: 20 }),
+  callType: varchar("callType", { length: 50 }),
+  callReason: varchar("callReason", { length: 255 }),
+  crtDate: timestamp("crtDate"),
+  updDate: timestamp("updDate"),
+  status: mysqlEnum("callStatus", ["OPENED", "CLOSED", "WIP"]).default("OPENED"),
+  resolutionTimeHours: int("resolutionTimeHours"),
+  satisfactionScore: int("satisfactionScore"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CallCenterCall = typeof callCenterCalls.$inferSelect;
+export type InsertCallCenterCall = typeof callCenterCalls.$inferInsert;
+
+/**
+ * IVI Scores - درجات مؤشر القيمة الذكي
+ * Stores calculated IVI scores for each corporate client
+ */
+export const iviScores = mysqlTable("ivi_scores", {
+  id: int("id").autoincrement().primaryKey(),
+  contNo: varchar("contNo", { length: 50 }).notNull(),
+  companyName: varchar("companyName", { length: 255 }),
+  sector: varchar("sector", { length: 100 }),
+  region: varchar("region", { length: 100 }),
+  employeeCount: int("employeeCount"),
+  totalClaims: int("totalClaims"),
+  totalClaimed: decimal("totalClaimed", { precision: 15, scale: 2 }),
+  totalApproved: decimal("totalApproved", { precision: 15, scale: 2 }),
+  hScore: decimal("hScore", { precision: 5, scale: 2 }),
+  eScore: decimal("eScore", { precision: 5, scale: 2 }),
+  uScore: decimal("uScore", { precision: 5, scale: 2 }),
+  iviScore: decimal("iviScore", { precision: 5, scale: 2 }),
+  riskCategory: mysqlEnum("riskCategory", ["Low", "Medium", "High"]).default("Medium"),
+  chronicRate: decimal("chronicRate", { precision: 5, scale: 2 }),
+  complaintRate: decimal("complaintRate", { precision: 5, scale: 2 }),
+  rejectionRate: decimal("rejectionRate", { precision: 5, scale: 2 }),
+  lossRatio: decimal("lossRatio", { precision: 5, scale: 2 }),
+  calculatedAt: timestamp("calculatedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type IviScore = typeof iviScores.$inferSelect;
+export type InsertIviScore = typeof iviScores.$inferInsert;

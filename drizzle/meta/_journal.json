@@ -15,6 +15,13 @@
       "when": 1768655999263,
       "tag": "0001_legal_living_lightning",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768658754067,
+      "tag": "0002_fearless_leader",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,140 @@
+CREATE TABLE `call_center_calls` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`callId` varchar(50) NOT NULL,
+	`mbrNo` varchar(50) NOT NULL,
+	`contNo` varchar(50) NOT NULL,
+	`callCat` varchar(20),
+	`callType` varchar(50),
+	`callReason` varchar(255),
+	`crtDate` timestamp,
+	`updDate` timestamp,
+	`callStatus` enum('OPENED','CLOSED','WIP') DEFAULT 'OPENED',
+	`resolutionTimeHours` int,
+	`satisfactionScore` int,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `call_center_calls_id` PRIMARY KEY(`id`),
+	CONSTRAINT `call_center_calls_callId_unique` UNIQUE(`callId`)
+);
+--> statement-breakpoint
+CREATE TABLE `claims` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`claimId` varchar(50) NOT NULL,
+	`mbrNo` varchar(50) NOT NULL,
+	`contNo` varchar(50) NOT NULL,
+	`provCode` varchar(50),
+	`claimDate` date,
+	`icdCode` varchar(20),
+	`diagnosis` varchar(255),
+	`benefitCode` varchar(20),
+	`benefitDesc` varchar(255),
+	`claimedAmount` decimal(12,2),
+	`approvedAmount` decimal(12,2),
+	`claimStatus` enum('Approved','Rejected','Pending','Partially Approved') DEFAULT 'Pending',
+	`rejectionReason` text,
+	`processingDays` int,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `claims_id` PRIMARY KEY(`id`),
+	CONSTRAINT `claims_claimId_unique` UNIQUE(`claimId`)
+);
+--> statement-breakpoint
+CREATE TABLE `corporate_clients` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`contNo` varchar(50) NOT NULL,
+	`companyName` varchar(255) NOT NULL,
+	`sector` varchar(100),
+	`region` varchar(100),
+	`network` varchar(20),
+	`employeeCount` int,
+	`contractStart` date,
+	`contractEnd` date,
+	`premiumAmount` decimal(15,2),
+	`isActive` boolean NOT NULL DEFAULT true,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `corporate_clients_id` PRIMARY KEY(`id`),
+	CONSTRAINT `corporate_clients_contNo_unique` UNIQUE(`contNo`)
+);
+--> statement-breakpoint
+CREATE TABLE `insurance_pre_auths` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`preauthId` varchar(50) NOT NULL,
+	`mbrNo` varchar(50) NOT NULL,
+	`contNo` varchar(50) NOT NULL,
+	`provCode` varchar(50),
+	`medicationName` varchar(255),
+	`medicationCategory` varchar(100),
+	`estimatedCost` decimal(12,2),
+	`requestDate` date,
+	`docsSubmitted` text,
+	`docsComplete` boolean DEFAULT false,
+	`preauthStatus` enum('Approved','Rejected','Pending') DEFAULT 'Pending',
+	`decisionDate` date,
+	`rejectionReason` text,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `insurance_pre_auths_id` PRIMARY KEY(`id`),
+	CONSTRAINT `insurance_pre_auths_preauthId_unique` UNIQUE(`preauthId`)
+);
+--> statement-breakpoint
+CREATE TABLE `ivi_scores` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`contNo` varchar(50) NOT NULL,
+	`companyName` varchar(255),
+	`sector` varchar(100),
+	`region` varchar(100),
+	`employeeCount` int,
+	`totalClaims` int,
+	`totalClaimed` decimal(15,2),
+	`totalApproved` decimal(15,2),
+	`hScore` decimal(5,2),
+	`eScore` decimal(5,2),
+	`uScore` decimal(5,2),
+	`iviScore` decimal(5,2),
+	`riskCategory` enum('Low','Medium','High') DEFAULT 'Medium',
+	`chronicRate` decimal(5,2),
+	`complaintRate` decimal(5,2),
+	`rejectionRate` decimal(5,2),
+	`lossRatio` decimal(5,2),
+	`calculatedAt` timestamp NOT NULL DEFAULT (now()),
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `ivi_scores_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `members` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`mbrNo` varchar(50) NOT NULL,
+	`contNo` varchar(50) NOT NULL,
+	`gender` varchar(10),
+	`age` int,
+	`maritalStatus` varchar(10),
+	`nationality` varchar(50),
+	`city` varchar(100),
+	`planNetwork` varchar(20),
+	`hasChronic` boolean DEFAULT false,
+	`chronicConditions` text,
+	`enrollmentDate` date,
+	`memberStatus` enum('Active','Suspended','Terminated') DEFAULT 'Active',
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `members_id` PRIMARY KEY(`id`),
+	CONSTRAINT `members_mbrNo_unique` UNIQUE(`mbrNo`)
+);
+--> statement-breakpoint
+CREATE TABLE `providers` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`provCode` varchar(50) NOT NULL,
+	`provName` varchar(255) NOT NULL,
+	`providerNetwork` varchar(20),
+	`providerPractice` varchar(100),
+	`providerRegion` varchar(100),
+	`providerTown` varchar(100),
+	`areaCode` varchar(20),
+	`isActive` boolean NOT NULL DEFAULT true,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `providers_id` PRIMARY KEY(`id`),
+	CONSTRAINT `providers_provCode_unique` UNIQUE(`provCode`)
+);

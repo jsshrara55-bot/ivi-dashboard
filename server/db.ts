@@ -335,3 +335,410 @@ export async function seedInitialData() {
 
   console.log("[Database] Initial data seeded successfully!");
 }
+
+
+// ============================================================
+// IVI DATA QUERIES - Based on Data Dictionary
+// ============================================================
+
+import { 
+  corporateClients, 
+  members, 
+  providers, 
+  claims, 
+  insurancePreAuths, 
+  callCenterCalls, 
+  iviScores,
+  InsertCorporateClient,
+  InsertMember,
+  InsertProvider,
+  InsertClaim,
+  InsertInsurancePreAuth,
+  InsertCallCenterCall,
+  InsertIviScore
+} from "../drizzle/schema";
+import { sql, count, sum, avg } from "drizzle-orm";
+
+// ==================== Corporate Clients ====================
+
+export async function getAllCorporateClients() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(corporateClients).where(eq(corporateClients.isActive, true));
+}
+
+export async function getCorporateClientByContNo(contNo: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(corporateClients).where(eq(corporateClients.contNo, contNo)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createCorporateClient(client: InsertCorporateClient) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(corporateClients).values(client);
+  return result[0].insertId;
+}
+
+export async function bulkInsertCorporateClients(clients: InsertCorporateClient[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (clients.length === 0) return;
+  await db.insert(corporateClients).values(clients);
+}
+
+// ==================== Members ====================
+
+export async function getAllMembers() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(members);
+}
+
+export async function getMembersByContNo(contNo: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(members).where(eq(members.contNo, contNo));
+}
+
+export async function getMemberByMbrNo(mbrNo: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(members).where(eq(members.mbrNo, mbrNo)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function bulkInsertMembers(membersList: InsertMember[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (membersList.length === 0) return;
+  // Insert in batches of 500 to avoid query size limits
+  const batchSize = 500;
+  for (let i = 0; i < membersList.length; i += batchSize) {
+    const batch = membersList.slice(i, i + batchSize);
+    await db.insert(members).values(batch);
+  }
+}
+
+// ==================== Providers ====================
+
+export async function getAllProviders() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(providers).where(eq(providers.isActive, true));
+}
+
+export async function getProviderByCode(provCode: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(providers).where(eq(providers.provCode, provCode)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function bulkInsertProviders(providersList: InsertProvider[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (providersList.length === 0) return;
+  const batchSize = 500;
+  for (let i = 0; i < providersList.length; i += batchSize) {
+    const batch = providersList.slice(i, i + batchSize);
+    await db.insert(providers).values(batch);
+  }
+}
+
+export async function getProviderStats() {
+  const db = await getDb();
+  if (!db) return { total: 0, byRegion: [], byPractice: [], byNetwork: [] };
+  
+  const total = await db.select({ count: count() }).from(providers);
+  
+  const byRegion = await db.select({
+    region: providers.providerRegion,
+    count: count()
+  }).from(providers).groupBy(providers.providerRegion);
+  
+  const byPractice = await db.select({
+    practice: providers.providerPractice,
+    count: count()
+  }).from(providers).groupBy(providers.providerPractice);
+  
+  const byNetwork = await db.select({
+    network: providers.providerNetwork,
+    count: count()
+  }).from(providers).groupBy(providers.providerNetwork);
+  
+  return {
+    total: total[0]?.count || 0,
+    byRegion,
+    byPractice,
+    byNetwork
+  };
+}
+
+// ==================== Claims ====================
+
+export async function getAllClaims() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(claims).orderBy(desc(claims.claimDate)).limit(1000);
+}
+
+export async function getClaimsByContNo(contNo: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(claims).where(eq(claims.contNo, contNo)).orderBy(desc(claims.claimDate));
+}
+
+export async function getClaimsByMbrNo(mbrNo: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(claims).where(eq(claims.mbrNo, mbrNo)).orderBy(desc(claims.claimDate));
+}
+
+export async function bulkInsertClaims(claimsList: InsertClaim[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (claimsList.length === 0) return;
+  const batchSize = 500;
+  for (let i = 0; i < claimsList.length; i += batchSize) {
+    const batch = claimsList.slice(i, i + batchSize);
+    await db.insert(claims).values(batch);
+  }
+}
+
+export async function getClaimsStats() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const stats = await db.select({
+    totalClaims: count(),
+    totalClaimed: sum(claims.claimedAmount),
+    totalApproved: sum(claims.approvedAmount),
+    avgProcessingDays: avg(claims.processingDays)
+  }).from(claims);
+  
+  const byStatus = await db.select({
+    status: claims.status,
+    count: count(),
+    amount: sum(claims.claimedAmount)
+  }).from(claims).groupBy(claims.status);
+  
+  const byBenefit = await db.select({
+    benefit: claims.benefitCode,
+    count: count(),
+    amount: sum(claims.claimedAmount)
+  }).from(claims).groupBy(claims.benefitCode);
+  
+  return {
+    ...stats[0],
+    byStatus,
+    byBenefit
+  };
+}
+
+// ==================== Insurance Pre-Authorizations ====================
+
+export async function getAllInsurancePreAuths() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(insurancePreAuths).orderBy(desc(insurancePreAuths.requestDate)).limit(500);
+}
+
+export async function getInsurancePreAuthsByContNo(contNo: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(insurancePreAuths).where(eq(insurancePreAuths.contNo, contNo));
+}
+
+export async function bulkInsertInsurancePreAuths(preAuthsList: InsertInsurancePreAuth[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (preAuthsList.length === 0) return;
+  const batchSize = 500;
+  for (let i = 0; i < preAuthsList.length; i += batchSize) {
+    const batch = preAuthsList.slice(i, i + batchSize);
+    await db.insert(insurancePreAuths).values(batch);
+  }
+}
+
+export async function getPreAuthStats() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const stats = await db.select({
+    total: count(),
+    totalCost: sum(insurancePreAuths.estimatedCost)
+  }).from(insurancePreAuths);
+  
+  const byStatus = await db.select({
+    status: insurancePreAuths.status,
+    count: count()
+  }).from(insurancePreAuths).groupBy(insurancePreAuths.status);
+  
+  const byCategory = await db.select({
+    category: insurancePreAuths.medicationCategory,
+    count: count(),
+    cost: sum(insurancePreAuths.estimatedCost)
+  }).from(insurancePreAuths).groupBy(insurancePreAuths.medicationCategory);
+  
+  return {
+    ...stats[0],
+    byStatus,
+    byCategory
+  };
+}
+
+// ==================== Call Center ====================
+
+export async function getAllCalls() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(callCenterCalls).orderBy(desc(callCenterCalls.crtDate)).limit(1000);
+}
+
+export async function getCallsByContNo(contNo: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(callCenterCalls).where(eq(callCenterCalls.contNo, contNo));
+}
+
+export async function bulkInsertCalls(callsList: InsertCallCenterCall[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (callsList.length === 0) return;
+  const batchSize = 500;
+  for (let i = 0; i < callsList.length; i += batchSize) {
+    const batch = callsList.slice(i, i + batchSize);
+    await db.insert(callCenterCalls).values(batch);
+  }
+}
+
+export async function getCallStats() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const stats = await db.select({
+    total: count(),
+    avgResolutionTime: avg(callCenterCalls.resolutionTimeHours),
+    avgSatisfaction: avg(callCenterCalls.satisfactionScore)
+  }).from(callCenterCalls);
+  
+  const byStatus = await db.select({
+    status: callCenterCalls.status,
+    count: count()
+  }).from(callCenterCalls).groupBy(callCenterCalls.status);
+  
+  const byType = await db.select({
+    type: callCenterCalls.callType,
+    count: count()
+  }).from(callCenterCalls).groupBy(callCenterCalls.callType);
+  
+  return {
+    ...stats[0],
+    byStatus,
+    byType
+  };
+}
+
+// ==================== IVI Scores ====================
+
+export async function getAllIviScores() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(iviScores).orderBy(desc(iviScores.iviScore));
+}
+
+export async function getIviScoreByContNo(contNo: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(iviScores).where(eq(iviScores.contNo, contNo)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function bulkInsertIviScores(scoresList: InsertIviScore[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (scoresList.length === 0) return;
+  await db.insert(iviScores).values(scoresList);
+}
+
+export async function getIviSummary() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const stats = await db.select({
+    totalCompanies: count(),
+    avgIviScore: avg(iviScores.iviScore),
+    avgHScore: avg(iviScores.hScore),
+    avgEScore: avg(iviScores.eScore),
+    avgUScore: avg(iviScores.uScore),
+    totalClaimed: sum(iviScores.totalClaimed),
+    totalApproved: sum(iviScores.totalApproved)
+  }).from(iviScores);
+  
+  const byRisk = await db.select({
+    risk: iviScores.riskCategory,
+    count: count()
+  }).from(iviScores).groupBy(iviScores.riskCategory);
+  
+  const bySector = await db.select({
+    sector: iviScores.sector,
+    count: count(),
+    avgScore: avg(iviScores.iviScore)
+  }).from(iviScores).groupBy(iviScores.sector);
+  
+  return {
+    ...stats[0],
+    byRisk,
+    bySector
+  };
+}
+
+// ==================== Data Import ====================
+
+export async function checkDataExists() {
+  const db = await getDb();
+  if (!db) return false;
+  
+  const existing = await db.select({ count: count() }).from(iviScores);
+  return (existing[0]?.count || 0) > 0;
+}
+
+export async function clearAllIviData() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Clear in reverse order of dependencies
+  await db.delete(iviScores);
+  await db.delete(callCenterCalls);
+  await db.delete(insurancePreAuths);
+  await db.delete(claims);
+  await db.delete(members);
+  await db.delete(providers);
+  await db.delete(corporateClients);
+}

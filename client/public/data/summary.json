@@ -1,0 +1,19 @@
+{
+  "total_companies": 25,
+  "total_members": 3086,
+  "total_claims": 12752,
+  "total_preauths": 926,
+  "total_calls": 3621,
+  "total_providers": 3558,
+  "avg_ivi_score": 43.16,
+  "risk_distribution": {
+    "High": 24,
+    "Medium": 1
+  },
+  "total_claimed_amount": 166304183,
+  "total_approved_amount": 144574596,
+  "claim_approval_rate": 74.8,
+  "preauth_approval_rate": 40.82,
+  "avg_satisfaction": 3.02,
+  "generated_at": "2026-01-17T09:04:38.478803"
+}
