@@ -6,8 +6,10 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Dashboard from "./pages/Dashboard";
 import SmartPreAuth from "./pages/SmartPreAuth";
+import AdminPanel from "./pages/AdminPanel";
 
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Dashboard} />
@@ -16,6 +18,7 @@ function Router() {
       <Route path={"/predictions"} component={Dashboard} />
       <Route path={"/settings"} component={Dashboard} />
       <Route path={"/pre-auth"} component={SmartPreAuth} />
+      <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
