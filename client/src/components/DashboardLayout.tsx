@@ -4,6 +4,8 @@ import { Activity, BarChart3, Database, LayoutDashboard, LogOut, Settings, Shiel
 import { Link, useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 import { Button } from "./ui/button";
+import { NotificationBell } from "./NotificationBell";
+import { Toaster } from "sonner";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -159,12 +161,39 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="lg:pl-72">
+        {/* Top header with notifications */}
+        <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border bg-background px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+            <div className="flex flex-1"></div>
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+              {/* Notification Bell */}
+              {isAuthenticated && <NotificationBell />}
+              
+              {/* Mobile user info */}
+              <div className="lg:hidden flex items-center gap-2">
+                {isAuthenticated ? (
+                  <Button variant="ghost" size="sm" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" onClick={() => window.location.href = getLoginUrl()}>
+                    Sign in
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+        
         <main className="py-10">
           <div className="px-4 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>
       </div>
+      
+      {/* Toast notifications */}
+      <Toaster position="top-left" richColors closeButton />
     </div>
   );
 }

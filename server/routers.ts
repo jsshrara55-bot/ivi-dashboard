@@ -528,6 +528,49 @@ export const appRouter = router({
         return getRiskChangeAlerts();
       }),
 
+      // Get recent alerts for real-time notifications (last 24 hours, unseen)
+      getRecent: protectedProcedure
+        .input(z.object({ 
+          lastSeenId: z.number().optional(),
+          limit: z.number().optional().default(10)
+        }).optional())
+        .query(async ({ input }) => {
+          const alerts = await getRiskChangeAlerts();
+          const lastSeenId = input?.lastSeenId || 0;
+          const limit = input?.limit || 10;
+          
+          // Filter alerts from last 24 hours and after lastSeenId
+          const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+          const recentAlerts = alerts
+            .filter(alert => {
+              const alertDate = new Date(alert.createdAt);
+              return alertDate >= oneDayAgo && alert.id > lastSeenId;
+            })
+            .slice(0, limit);
+          
+          return {
+            alerts: recentAlerts,
+            hasNew: recentAlerts.length > 0,
+            latestId: recentAlerts.length > 0 ? Math.max(...recentAlerts.map(a => a.id)) : lastSeenId
+          };
+        }),
+
+      // Get unread count for notification badge
+      getUnreadCount: protectedProcedure
+        .input(z.object({ lastSeenId: z.number().optional() }).optional())
+        .query(async ({ input }) => {
+          const alerts = await getRiskChangeAlerts();
+          const lastSeenId = input?.lastSeenId || 0;
+          
+          const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+          const unreadCount = alerts.filter(alert => {
+            const alertDate = new Date(alert.createdAt);
+            return alertDate >= oneDayAgo && alert.id > lastSeenId;
+          }).length;
+          
+          return { count: unreadCount };
+        }),
+
       getUnsent: adminProcedure.query(async () => {
         return getUnsentRiskAlerts();
       }),

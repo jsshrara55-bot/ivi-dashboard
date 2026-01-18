@@ -102,3 +102,14 @@
 - [x] Create API endpoints for scheduler management
 - [x] Add scheduler UI in Risk Alerts page
 - [x] Test scheduled notifications system
+
+## Phase 15: Bug Fix
+- [ ] Fix "1 error" appearing in Dashboard page (Total Companies card)
+
+## Phase 16: Real-time Risk Alerts
+- [x] Create real-time notification system for immediate risk changes
+- [x] Add polling mechanism to check for new risk alerts (getRecent, getUnreadCount endpoints)
+- [x] Create notification bell component with badge counter
+- [x] Add toast notifications for new risk changes (using sonner)
+- [x] Integrate notifications in DashboardLayout header
+- [x] Test real-time alerts functionality
