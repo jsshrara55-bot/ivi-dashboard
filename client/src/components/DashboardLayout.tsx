@@ -77,8 +77,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </ul>
         </li>
 
-        {/* Admin Section */}
-        {user?.role === 'admin' && (
+        {/* Admin Section - Visible to all authenticated users */}
+        {isAuthenticated && (
           <li>
             <div className="text-xs font-semibold leading-6 text-sidebar-foreground/60 uppercase tracking-wider">
               Administration
