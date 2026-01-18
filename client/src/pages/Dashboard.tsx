@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FeatureImportance, fetchCsvData, FuturePrediction, IVIScore, Recommendation } from "@/lib/csv";
 import { trpc } from "@/lib/trpc";
-import { Activity, AlertTriangle, BarChart3, Building2, Download, FileText, Filter, Phone, TrendingUp, Users } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Building2, Download, FileSpreadsheet, FileText, Filter, Phone, TrendingUp, Users } from "lucide-react";
+import * as XLSX from 'xlsx';
 import { useEffect, useMemo, useState } from "react";
 
 export default function Dashboard() {
@@ -197,6 +198,82 @@ export default function Dashboard() {
     }
   };
 
+  // Export to Excel function
+  const exportToExcel = () => {
+    // Prepare data for export
+    const exportData = filteredScores.map(score => ({
+      'Client ID': score.CONT_NO,
+      'Company Name': score.Company_Name || '-',
+      'Region': score.Region || '-',
+      'Sector': score.Sector || '-',
+      'Risk Category': score.Risk_Category,
+      'H Score': score.H_score.toFixed(1),
+      'E Score': score.E_score.toFixed(1),
+      'U Score': score.U_score.toFixed(1),
+      'IVI Score': score.IVI_Score.toFixed(1),
+    }));
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    
+    // Main data sheet
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    XLSX.utils.book_append_sheet(wb, ws, 'IVI Scores');
+
+    // Summary sheet
+    const summaryData = [
+      { 'Metric': 'Total Companies', 'Value': filteredScores.length },
+      { 'Metric': 'Average IVI Score', 'Value': (filteredScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (filteredScores.length || 1)).toFixed(1) },
+      { 'Metric': 'High Risk Clients', 'Value': filteredScores.filter(s => s.Risk_Category === 'High Risk').length },
+      { 'Metric': 'Medium Risk Clients', 'Value': filteredScores.filter(s => s.Risk_Category === 'Medium Risk').length },
+      { 'Metric': 'Low Risk Clients', 'Value': filteredScores.filter(s => s.Risk_Category === 'Low Risk').length },
+      { 'Metric': 'Average H Score', 'Value': (filteredScores.reduce((sum, s) => sum + s.H_score, 0) / (filteredScores.length || 1)).toFixed(1) },
+      { 'Metric': 'Average E Score', 'Value': (filteredScores.reduce((sum, s) => sum + s.E_score, 0) / (filteredScores.length || 1)).toFixed(1) },
+      { 'Metric': 'Average U Score', 'Value': (filteredScores.reduce((sum, s) => sum + s.U_score, 0) / (filteredScores.length || 1)).toFixed(1) },
+      { 'Metric': 'Report Generated', 'Value': new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) },
+    ];
+    const summaryWs = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+
+    // Risk distribution by region
+    const regionData = regions.map(region => {
+      const regionScores = filteredScores.filter(s => s.Region === region);
+      return {
+        'Region': region,
+        'Total': regionScores.length,
+        'High Risk': regionScores.filter(s => s.Risk_Category === 'High Risk').length,
+        'Medium Risk': regionScores.filter(s => s.Risk_Category === 'Medium Risk').length,
+        'Low Risk': regionScores.filter(s => s.Risk_Category === 'Low Risk').length,
+        'Avg IVI': (regionScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (regionScores.length || 1)).toFixed(1),
+      };
+    });
+    if (regionData.length > 0) {
+      const regionWs = XLSX.utils.json_to_sheet(regionData);
+      XLSX.utils.book_append_sheet(wb, regionWs, 'By Region');
+    }
+
+    // Risk distribution by sector
+    const sectorData = sectors.map(sector => {
+      const sectorScores = filteredScores.filter(s => s.Sector === sector);
+      return {
+        'Sector': sector,
+        'Total': sectorScores.length,
+        'High Risk': sectorScores.filter(s => s.Risk_Category === 'High Risk').length,
+        'Medium Risk': sectorScores.filter(s => s.Risk_Category === 'Medium Risk').length,
+        'Low Risk': sectorScores.filter(s => s.Risk_Category === 'Low Risk').length,
+        'Avg IVI': (sectorScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (sectorScores.length || 1)).toFixed(1),
+      };
+    });
+    if (sectorData.length > 0) {
+      const sectorWs = XLSX.utils.json_to_sheet(sectorData);
+      XLSX.utils.book_append_sheet(wb, sectorWs, 'By Sector');
+    }
+
+    // Download file
+    const fileName = `IVI_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -247,10 +324,16 @@ export default function Dashboard() {
               Comprehensive analysis of client portfolio health, experience, and utilization efficiency.
             </p>
           </div>
-          <Button onClick={exportToPDF} variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export PDF Report
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={exportToPDF} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              PDF
+            </Button>
+            <Button onClick={exportToExcel} variant="outline" className="gap-2">
+              <FileSpreadsheet className="h-4 w-4" />
+              Excel
+            </Button>
+          </div>
         </div>
 
         {/* Filters Section */}

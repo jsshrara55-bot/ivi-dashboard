@@ -1,0 +1,70 @@
+{
+  "query": "SELECT contNo, companyName, sector, region FROM ivi_scores LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3mLzWaRW347uFNW.f6161027b40f --database ntgVGsyWiNaSct4QtCMjEg --execute SELECT contNo, companyName, sector, region FROM ivi_scores LIMIT 10;",
+  "rows": [
+    {
+      "contNo": "CONT20240001",
+      "companyName": "Company 1",
+      "sector": "NULL",
+      "region": "NULL"
+    },
+    {
+      "contNo": "CONT20240002",
+      "companyName": "Company 2",
+      "sector": "NULL",
+      "region": "NULL"
+    },
+    {
+      "contNo": "CONT20240003",
+      "companyName": "Company 3",
+      "sector": "NULL",
+      "region": "NULL"
+    },
+    {
+      "contNo": "CONT20240004",
+      "companyName": "Company 4",
+      "sector": "NULL",
+      "region": "NULL"
+    },
+    {
+      "contNo": "CONT20240005",
+      "companyName": "Company 5",
+      "sector": "NULL",
+      "region": "NULL"
+    },
+    {
+      "contNo": "CONT20240006",
+      "companyName": "Company 6",
+      "sector": "NULL",
+      "region": "NULL"
+    },
+    {
+      "contNo": "CONT20240007",
+      "companyName": "Company 7",
+      "sector": "NULL",
+      "region": "NULL"
+    },
+    {
+      "contNo": "CONT20240008",
+      "companyName": "Company 8",
+      "sector": "NULL",
+      "region": "NULL"
+    },
+    {
+      "contNo": "CONT20240009",
+      "companyName": "Company 9",
+      "sector": "NULL",
+      "region": "NULL"
+    },
+    {
+      "contNo": "CONT20240010",
+      "companyName": "Company 10",
+      "sector": "NULL",
+      "region": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "contNo\tcompanyName\tsector\tregion\nCONT20240001\tCompany 1\tNULL\tNULL\nCONT20240002\tCompany 2\tNULL\tNULL\nCONT20240003\tCompany 3\tNULL\tNULL\nCONT20240004\tCompany 4\tNULL\tNULL\nCONT20240005\tCompany 5\tNULL\tNULL\nCONT20240006\tCompany 6\tNULL\tNULL\nCONT20240007\tCompany 7\tNULL\tNULL\nCONT20240008\tCompany 8\tNULL\tNULL\nCONT20240009\tCompany 9\tNULL\tNULL\nCONT20240010\tCompany 10\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 2087
+}

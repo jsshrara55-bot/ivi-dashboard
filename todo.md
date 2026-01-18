@@ -82,3 +82,10 @@
 - [x] Create risk_change_alerts database table
 - [x] Add API endpoints for risk alerts management
 - [x] Review and validate all data
+
+## Phase 12: Data Enhancement and New Features
+- [x] Add real region and sector data from original dataset
+- [x] Update IVI scores with region and sector information
+- [x] Create Risk Alerts management page in Admin Panel
+- [x] Add Excel export functionality alongside PDF
+- [x] Test all new features

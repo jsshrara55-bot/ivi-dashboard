@@ -1,0 +1,210 @@
+{
+  "query": "SELECT contNo, companyName, sector, region, iviScore, riskCategory FROM ivi_scores;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3mLzWaRW347uFNW.f6161027b40f --database ntgVGsyWiNaSct4QtCMjEg --execute SELECT contNo, companyName, sector, region, iviScore, riskCategory FROM ivi_scores;",
+  "rows": [
+    {
+      "contNo": "CONT20240001",
+      "companyName": "Company 1",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "16.47",
+      "riskCategory": "Low"
+    },
+    {
+      "contNo": "CONT20240002",
+      "companyName": "Company 2",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "24.40",
+      "riskCategory": "Medium"
+    },
+    {
+      "contNo": "CONT20240003",
+      "companyName": "Company 3",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "60.84",
+      "riskCategory": "Low"
+    },
+    {
+      "contNo": "CONT20240004",
+      "companyName": "Company 4",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "39.47",
+      "riskCategory": "Low"
+    },
+    {
+      "contNo": "CONT20240005",
+      "companyName": "Company 5",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "58.98",
+      "riskCategory": "Medium"
+    },
+    {
+      "contNo": "CONT20240006",
+      "companyName": "Company 6",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "27.07",
+      "riskCategory": "Medium"
+    },
+    {
+      "contNo": "CONT20240007",
+      "companyName": "Company 7",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "64.17",
+      "riskCategory": "Low"
+    },
+    {
+      "contNo": "CONT20240008",
+      "companyName": "Company 8",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "16.26",
+      "riskCategory": "High"
+    },
+    {
+      "contNo": "CONT20240009",
+      "companyName": "Company 9",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "5.13",
+      "riskCategory": "High"
+    },
+    {
+      "contNo": "CONT20240010",
+      "companyName": "Company 10",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "7.23",
+      "riskCategory": "High"
+    },
+    {
+      "contNo": "CONT20240011",
+      "companyName": "Company 11",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "63.93",
+      "riskCategory": "Medium"
+    },
+    {
+      "contNo": "CONT20240012",
+      "companyName": "Company 12",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "10.64",
+      "riskCategory": "High"
+    },
+    {
+      "contNo": "CONT20240013",
+      "companyName": "Company 13",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "50.81",
+      "riskCategory": "High"
+    },
+    {
+      "contNo": "CONT20240014",
+      "companyName": "Company 14",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "30.58",
+      "riskCategory": "Medium"
+    },
+    {
+      "contNo": "CONT20240015",
+      "companyName": "Company 15",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "19.37",
+      "riskCategory": "Medium"
+    },
+    {
+      "contNo": "CONT20240016",
+      "companyName": "Company 16",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "2.00",
+      "riskCategory": "Low"
+    },
+    {
+      "contNo": "CONT20240017",
+      "companyName": "Company 17",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "90.09",
+      "riskCategory": "High"
+    },
+    {
+      "contNo": "CONT20240018",
+      "companyName": "Company 18",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "54.46",
+      "riskCategory": "Low"
+    },
+    {
+      "contNo": "CONT20240019",
+      "companyName": "Company 19",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "72.49",
+      "riskCategory": "High"
+    },
+    {
+      "contNo": "CONT20240020",
+      "companyName": "Company 20",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "85.37",
+      "riskCategory": "Low"
+    },
+    {
+      "contNo": "CONT20240021",
+      "companyName": "Company 21",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "22.84",
+      "riskCategory": "High"
+    },
+    {
+      "contNo": "CONT20240022",
+      "companyName": "Company 22",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "47.14",
+      "riskCategory": "Medium"
+    },
+    {
+      "contNo": "CONT20240023",
+      "companyName": "Company 23",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "43.34",
+      "riskCategory": "High"
+    },
+    {
+      "contNo": "CONT20240024",
+      "companyName": "Company 24",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "58.39",
+      "riskCategory": "Low"
+    },
+    {
+      "contNo": "CONT20240025",
+      "companyName": "Company 25",
+      "sector": "NULL",
+      "region": "NULL",
+      "iviScore": "63.62",
+      "riskCategory": "Medium"
+    }
+  ],
+  "messages": [],
+  "stdout": "contNo\tcompanyName\tsector\tregion\tiviScore\triskCategory\nCONT20240001\tCompany 1\tNULL\tNULL\t16.47\tLow\nCONT20240002\tCompany 2\tNULL\tNULL\t24.40\tMedium\nCONT20240003\tCompany 3\tNULL\tNULL\t60.84\tLow\nCONT20240004\tCompany 4\tNULL\tNULL\t39.47\tLow\nCONT20240005\tCompany 5\tNULL\tNULL\t58.98\tMedium\nCONT20240006\tCompany 6\tNULL\tNULL\t27.07\tMedium\nCONT20240007\tCompany 7\tNULL\tNULL\t64.17\tLow\nCONT20240008\tCompany 8\tNULL\tNULL\t16.26\tHigh\nCONT20240009\tCompany 9\tNULL\tNULL\t5.13\tHigh\nCONT20240010\tCompany 10\tNULL\tNULL\t7.23\tHigh\nCONT20240011\tCompany 11\tNULL\tNULL\t63.93\tMedium\nCONT20240012\tCompany 12\tNULL\tNULL\t10.64\tHigh\nCONT20240013\tCompany 13\tNULL\tNULL\t50.81\tHigh\nCONT20240014\tCompany 14\tNULL\tNULL\t30.58\tMedium\nCONT20240015\tCompany 15\tNULL\tNULL\t19.37\tMedium\nCONT20240016\tCompany 16\tNULL\tNULL\t2.00\tLow\nCONT20240017\tCompany 17\tNULL\tNULL\t90.09\tHigh\nCONT20240018\tCompany 18\tNULL\tNULL\t54.46\tLow\nCONT20240019\tCompany 19\tNULL\tNULL\t72.49\tHigh\nCONT20240020\tCompany 20\tNULL\tNULL\t85.37\tLow\nCONT20240021\tCompany 21\tNULL\tNULL\t22.84\tHigh\nCONT20240022\tCompany 22\tNULL\tNULL\t47.14\tMedium\nCONT20240023\tCompany 23\tNULL\tNULL\t43.34\tHigh\nCONT20240024\tCompany 24\tNULL\tNULL\t58.39\tLow\nCONT20240025\tCompany 25\tNULL\tNULL\t63.62\tMedium\n",
+  "stderr": "",
+  "execution_time_ms": 1659
+}

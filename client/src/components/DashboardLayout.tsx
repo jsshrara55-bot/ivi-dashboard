@@ -1,6 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { Activity, BarChart3, Database, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users, Upload } from "lucide-react";
+import { Activity, BarChart3, Database, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users, Upload, Bell } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 import { Button } from "./ui/button";
@@ -27,6 +27,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const adminNavigation = [
     { name: 'Admin Panel', href: '/admin', icon: Shield },
     { name: 'Data Loader', href: '/data-loader', icon: Upload },
+    { name: 'Risk Alerts', href: '/risk-alerts', icon: Bell },
   ];
 
   const handleLogout = async () => {

@@ -13,6 +13,7 @@ import Clients from "./pages/Clients";
 import Analytics from "./pages/Analytics";
 import ClientDetails from "./pages/ClientDetails";
 import Predictions from "./pages/Predictions";
+import RiskAlerts from "./pages/RiskAlerts";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -28,6 +29,7 @@ function Router() {
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/data-explorer"} component={DataExplorer} />
       <Route path={"/data-loader"} component={DataLoader} />
+      <Route path={"/risk-alerts"} component={RiskAlerts} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
