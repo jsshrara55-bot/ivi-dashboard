@@ -54,24 +54,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <ul role="list" className="-mx-2 space-y-1">
                   {navigation.map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href}>
-                        <a
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          location === item.href
+                            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',
+                          'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6'
+                        )}
+                      >
+                        <item.icon
                           className={cn(
-                            location === item.href
-                              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',
-                            'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6'
+                            location === item.href ? 'text-sidebar-accent-foreground' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground',
+                            'h-6 w-6 shrink-0'
                           )}
-                        >
-                          <item.icon
-                            className={cn(
-                              location === item.href ? 'text-sidebar-accent-foreground' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground',
-                              'h-6 w-6 shrink-0'
-                            )}
-                            aria-hidden="true"
-                          />
-                          {item.name}
-                        </a>
+                          aria-hidden="true"
+                        />
+                        {item.name}
                       </Link>
                     </li>
                   ))}
@@ -87,24 +86,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
                     {adminNavigation.map((item) => (
                       <li key={item.name}>
-                        <Link href={item.href}>
-                          <a
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            location === item.href
+                              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',
+                            'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6'
+                          )}
+                        >
+                          <item.icon
                             className={cn(
-                              location === item.href
-                                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                                : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',
-                              'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6'
+                              location === item.href ? 'text-sidebar-accent-foreground' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground',
+                              'h-6 w-6 shrink-0'
                             )}
-                          >
-                            <item.icon
-                              className={cn(
-                                location === item.href ? 'text-sidebar-accent-foreground' : 'text-sidebar-foreground group-hover:text-sidebar-accent-foreground',
-                                'h-6 w-6 shrink-0'
-                              )}
-                              aria-hidden="true"
-                            />
-                            {item.name}
-                          </a>
+                            aria-hidden="true"
+                          />
+                          {item.name}
                         </Link>
                       </li>
                     ))}

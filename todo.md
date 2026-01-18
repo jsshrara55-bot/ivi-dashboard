@@ -104,7 +104,7 @@
 - [x] Test scheduled notifications system
 
 ## Phase 15: Bug Fix
-- [ ] Fix "1 error" appearing in Dashboard page (Total Companies card)
+- [x] Fix "1 error" - nested <a> tags in DashboardLayout.tsx navigation links
 
 ## Phase 16: Real-time Risk Alerts
 - [x] Create real-time notification system for immediate risk changes

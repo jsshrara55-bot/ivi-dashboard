@@ -417,7 +417,8 @@ export default function Clients() {
                       <TableCell>{client.uScore ? parseFloat(client.uScore).toFixed(1) : "-"}</TableCell>
                       <TableCell>{getRiskBadge(client.riskCategory)}</TableCell>
                       <TableCell className="text-center">
-                       <Link href={`/client/${client.contNo}`}>                        <Button variant="outline" size="sm" className="gap-1">
+                        <Link href={`/client/${client.contNo}`}>
+                          <Button variant="outline" size="sm" className="gap-1">
                             <Eye className="h-4 w-4" />
                             عرض
                           </Button>
