@@ -14,7 +14,11 @@ import {
   InsertRequestDocument,
   InsertRequestChecklistItem,
   riskChangeAlerts,
-  InsertRiskChangeAlert
+  InsertRiskChangeAlert,
+  notificationScheduler,
+  InsertNotificationScheduler,
+  notificationLog,
+  InsertNotificationLog
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -844,4 +848,95 @@ export async function checkAndCreateRiskAlerts(newScores: { contNo: string; comp
   }
   
   return alerts;
+}
+
+
+// ==================== Notification Scheduler ====================
+
+export async function getSchedulerSettings() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const settings = await db.select().from(notificationScheduler).limit(1);
+  return settings[0] || null;
+}
+
+export async function createOrUpdateSchedulerSettings(settings: Partial<InsertNotificationScheduler>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await getSchedulerSettings();
+  
+  if (existing) {
+    await db.update(notificationScheduler)
+      .set({ ...settings, updatedAt: new Date() })
+      .where(eq(notificationScheduler.id, existing.id));
+    return existing.id;
+  } else {
+    const result = await db.insert(notificationScheduler).values({
+      isEnabled: settings.isEnabled ?? false,
+      scheduledTime: settings.scheduledTime ?? "09:00",
+      daysOfWeek: settings.daysOfWeek ?? "1,2,3,4,5",
+      ...settings
+    });
+    return result[0].insertId;
+  }
+}
+
+export async function updateSchedulerLastRun(status: "success" | "failed" | "partial", count: number, error?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await getSchedulerSettings();
+  if (!existing) return;
+  
+  await db.update(notificationScheduler)
+    .set({
+      lastRunAt: new Date(),
+      lastRunCount: count,
+      lastRunStatus: status,
+      lastRunError: error || null,
+      updatedAt: new Date()
+    })
+    .where(eq(notificationScheduler.id, existing.id));
+}
+
+export async function updateSchedulerNextRun(nextRunAt: Date) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await getSchedulerSettings();
+  if (!existing) return;
+  
+  await db.update(notificationScheduler)
+    .set({ nextRunAt, updatedAt: new Date() })
+    .where(eq(notificationScheduler.id, existing.id));
+}
+
+// ==================== Notification Log ====================
+
+export async function createNotificationLog(log: InsertNotificationLog) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(notificationLog).values(log);
+  return result[0].insertId;
+}
+
+export async function getNotificationLogs(limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(notificationLog).orderBy(desc(notificationLog.sentAt)).limit(limit);
+}
+
+export async function getNotificationLogsByType(type: "risk_escalation" | "risk_improvement" | "scheduled_daily" | "manual", limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select()
+    .from(notificationLog)
+    .where(eq(notificationLog.notificationType, type))
+    .orderBy(desc(notificationLog.sentAt))
+    .limit(limit);
 }

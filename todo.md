@@ -95,3 +95,10 @@
 - [x] Add Excel export to Clients page with applied filters
 - [x] Set up automatic email notifications for risk alerts (using Manus notification system)
 - [x] Test all new features
+
+## Phase 14: Scheduled Notifications
+- [x] Create scheduled job system for daily risk alerts
+- [x] Add notification scheduler settings table in database
+- [x] Create API endpoints for scheduler management
+- [x] Add scheduler UI in Risk Alerts page
+- [x] Test scheduled notifications system

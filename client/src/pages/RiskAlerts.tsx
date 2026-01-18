@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,33 @@ import {
   RefreshCw,
   Send,
   BarChart3,
-  LineChart as LineChartIcon
+  LineChart as LineChartIcon,
+  Clock,
+  Settings,
+  Play,
+  Pause,
+  Calendar,
+  History
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
@@ -42,11 +67,27 @@ import {
   Cell,
 } from "recharts";
 
+const DAYS_OF_WEEK = [
+  { value: "0", label: "الأحد" },
+  { value: "1", label: "الإثنين" },
+  { value: "2", label: "الثلاثاء" },
+  { value: "3", label: "الأربعاء" },
+  { value: "4", label: "الخميس" },
+  { value: "5", label: "الجمعة" },
+  { value: "6", label: "السبت" },
+];
+
 export default function RiskAlerts() {
   const [sending, setSending] = useState<number | null>(null);
+  const [schedulerDialogOpen, setSchedulerDialogOpen] = useState(false);
+  const [schedulerEnabled, setSchedulerEnabled] = useState(false);
+  const [scheduledTime, setScheduledTime] = useState("09:00");
+  const [selectedDays, setSelectedDays] = useState<string[]>(["1", "2", "3", "4", "5"]);
   
   const { data: alerts, isLoading, refetch } = trpc.ivi.riskAlerts.list.useQuery();
   const { data: unsentAlerts } = trpc.ivi.riskAlerts.getUnsent.useQuery();
+  const { data: schedulerStatus, refetch: refetchScheduler } = trpc.ivi.scheduler.getStatus.useQuery();
+  const { data: notificationLogs } = trpc.ivi.scheduler.getLogs.useQuery({ limit: 20 });
   
   const sendNotification = trpc.ivi.riskAlerts.sendNotification.useMutation({
     onSuccess: () => {
@@ -79,6 +120,41 @@ export default function RiskAlerts() {
     }
   });
 
+  const updateScheduler = trpc.ivi.scheduler.updateSettings.useMutation({
+    onSuccess: () => {
+      toast.success("تم تحديث إعدادات الجدولة بنجاح");
+      refetchScheduler();
+      setSchedulerDialogOpen(false);
+    },
+    onError: (error) => {
+      toast.error("فشل تحديث الإعدادات: " + error.message);
+    }
+  });
+
+  const triggerNow = trpc.ivi.scheduler.triggerNow.useMutation({
+    onSuccess: (result) => {
+      if (result.sent > 0) {
+        toast.success(`تم إرسال ${result.sent} إشعار بنجاح`);
+      } else {
+        toast.info("لا توجد تنبيهات للإرسال");
+      }
+      refetch();
+      refetchScheduler();
+    },
+    onError: () => {
+      toast.error("فشل تشغيل الجدولة يدوياً");
+    }
+  });
+
+  // Sync scheduler settings when data loads
+  useEffect(() => {
+    if (schedulerStatus) {
+      setSchedulerEnabled(schedulerStatus.isEnabled);
+      setScheduledTime(schedulerStatus.scheduledTime);
+      setSelectedDays(schedulerStatus.daysOfWeek.split(","));
+    }
+  }, [schedulerStatus]);
+
   const handleSendNotification = async (alertId: number) => {
     setSending(alertId);
     await sendNotification.mutateAsync({ alertId });
@@ -86,6 +162,38 @@ export default function RiskAlerts() {
 
   const handleSendAllNotifications = async () => {
     await sendAllNotifications.mutateAsync();
+  };
+
+  const handleSaveScheduler = async () => {
+    if (selectedDays.length === 0) {
+      toast.error("يرجى اختيار يوم واحد على الأقل");
+      return;
+    }
+    await updateScheduler.mutateAsync({
+      isEnabled: schedulerEnabled,
+      scheduledTime,
+      daysOfWeek: selectedDays.sort().join(","),
+    });
+  };
+
+  const toggleDay = (day: string) => {
+    setSelectedDays(prev => 
+      prev.includes(day) 
+        ? prev.filter(d => d !== day)
+        : [...prev, day]
+    );
+  };
+
+  const formatNextRun = (date: Date | null) => {
+    if (!date) return "غير محدد";
+    return new Date(date).toLocaleString("ar-SA", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const getRiskBadgeColor = (risk: string) => {
@@ -218,7 +326,130 @@ export default function RiskAlerts() {
               إدارة ومتابعة تنبيهات تغيير فئة المخاطر للشركات
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Dialog open={schedulerDialogOpen} onOpenChange={setSchedulerDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Clock className="h-4 w-4" />
+                  الجدولة
+                  {schedulerStatus?.isEnabled && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                      مفعلة
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    إعدادات الجدولة التلقائية
+                  </DialogTitle>
+                  <DialogDescription>
+                    تكوين إرسال الإشعارات التلقائية لتنبيهات تغيير المخاطر
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-6 py-4">
+                  {/* Enable/Disable Toggle */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>تفعيل الجدولة</Label>
+                      <p className="text-sm text-muted-foreground">
+                        إرسال الإشعارات تلقائياً في الوقت المحدد
+                      </p>
+                    </div>
+                    <Switch
+                      checked={schedulerEnabled}
+                      onCheckedChange={setSchedulerEnabled}
+                    />
+                  </div>
+
+                  {/* Time Selection */}
+                  <div className="space-y-2">
+                    <Label>وقت الإرسال</Label>
+                    <Input
+                      type="time"
+                      value={scheduledTime}
+                      onChange={(e) => setScheduledTime(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Days Selection */}
+                  <div className="space-y-2">
+                    <Label>أيام الإرسال</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {DAYS_OF_WEEK.map((day) => (
+                        <Button
+                          key={day.value}
+                          type="button"
+                          variant={selectedDays.includes(day.value) ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => toggleDay(day.value)}
+                          className="min-w-[70px]"
+                        >
+                          {day.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Status Info */}
+                  {schedulerStatus && (
+                    <div className="bg-muted p-4 rounded-lg space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">التشغيل التالي:</span>
+                        <span className="font-medium">{formatNextRun(schedulerStatus.nextRunAt)}</span>
+                      </div>
+                      {schedulerStatus.lastRunAt && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <History className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">آخر تشغيل:</span>
+                          <span className="font-medium">
+                            {new Date(schedulerStatus.lastRunAt).toLocaleString("ar-SA")}
+                          </span>
+                          {schedulerStatus.lastRunStatus && (
+                            <Badge 
+                              variant="secondary" 
+                              className={schedulerStatus.lastRunStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+                            >
+                              {schedulerStatus.lastRunStatus === 'success' ? 'ناجح' : 'فشل'}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                      {schedulerStatus.lastRunCount > 0 && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Send className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">إشعارات مرسلة:</span>
+                          <span className="font-medium">{schedulerStatus.lastRunCount}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <DialogFooter className="gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => triggerNow.mutate()}
+                    disabled={triggerNow.isPending}
+                  >
+                    <Play className="h-4 w-4 ml-2" />
+                    تشغيل الآن
+                  </Button>
+                  <Button
+                    onClick={handleSaveScheduler}
+                    disabled={updateScheduler.isPending}
+                  >
+                    حفظ الإعدادات
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            
             <Button variant="outline" onClick={() => refetch()}>
               <RefreshCw className="h-4 w-4 ml-2" />
               تحديث

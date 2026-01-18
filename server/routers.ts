@@ -57,7 +57,17 @@ import {
   getUnsentRiskAlerts,
   markAlertAsSent,
   createRiskChangeAlert,
+  // Scheduler
+  getSchedulerSettings,
+  createOrUpdateSchedulerSettings,
+  getNotificationLogs,
 } from "./db";
+import {
+  startScheduler,
+  stopScheduler,
+  triggerSchedulerNow,
+  getSchedulerStatus,
+} from "./scheduler";
 import { notifyOwner } from "./_core/notification";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
@@ -641,6 +651,52 @@ export const appRouter = router({
           results 
         };
       }),
+    }),
+
+    // Scheduler management
+    scheduler: router({
+      getStatus: adminProcedure.query(async () => {
+        return getSchedulerStatus();
+      }),
+
+      getSettings: adminProcedure.query(async () => {
+        return getSchedulerSettings();
+      }),
+
+      updateSettings: adminProcedure
+        .input(z.object({
+          isEnabled: z.boolean(),
+          scheduledTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)"),
+          daysOfWeek: z.string().regex(/^[0-6](,[0-6])*$/, "Invalid days format"),
+        }))
+        .mutation(async ({ input, ctx }) => {
+          await createOrUpdateSchedulerSettings({
+            isEnabled: input.isEnabled,
+            scheduledTime: input.scheduledTime,
+            daysOfWeek: input.daysOfWeek,
+            modifiedBy: ctx.user.id,
+          });
+
+          // Start or stop scheduler based on settings
+          if (input.isEnabled) {
+            startScheduler();
+          } else {
+            stopScheduler();
+          }
+
+          return { success: true };
+        }),
+
+      triggerNow: adminProcedure.mutation(async () => {
+        const result = await triggerSchedulerNow();
+        return result;
+      }),
+
+      getLogs: adminProcedure
+        .input(z.object({ limit: z.number().optional() }).optional())
+        .query(async ({ input }) => {
+          return getNotificationLogs(input?.limit || 100);
+        }),
     }),
   }),
 });

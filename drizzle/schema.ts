@@ -326,3 +326,61 @@ export const riskChangeAlerts = mysqlTable("risk_change_alerts", {
 
 export type RiskChangeAlert = typeof riskChangeAlerts.$inferSelect;
 export type InsertRiskChangeAlert = typeof riskChangeAlerts.$inferInsert;
+
+/**
+ * Notification Scheduler Settings - إعدادات جدولة الإشعارات
+ * Stores configuration for automated daily risk alert notifications
+ */
+export const notificationScheduler = mysqlTable("notification_scheduler", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Whether the scheduler is enabled */
+  isEnabled: boolean("isEnabled").default(false).notNull(),
+  /** Time of day to send notifications (HH:MM format) */
+  scheduledTime: varchar("scheduledTime", { length: 5 }).default("09:00").notNull(),
+  /** Days of week to send (comma-separated: 0=Sun, 1=Mon, ..., 6=Sat) */
+  daysOfWeek: varchar("daysOfWeek", { length: 20 }).default("1,2,3,4,5").notNull(),
+  /** Last time the scheduler ran */
+  lastRunAt: timestamp("lastRunAt"),
+  /** Next scheduled run time */
+  nextRunAt: timestamp("nextRunAt"),
+  /** Number of notifications sent in last run */
+  lastRunCount: int("lastRunCount").default(0),
+  /** Status of last run */
+  lastRunStatus: mysqlEnum("lastRunStatus", ["success", "failed", "partial"]),
+  /** Error message if last run failed */
+  lastRunError: text("lastRunError"),
+  /** User who last modified the settings */
+  modifiedBy: int("modifiedBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type NotificationScheduler = typeof notificationScheduler.$inferSelect;
+export type InsertNotificationScheduler = typeof notificationScheduler.$inferInsert;
+
+/**
+ * Notification Log - سجل الإشعارات
+ * Tracks all sent notifications for audit purposes
+ */
+export const notificationLog = mysqlTable("notification_log", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Type of notification */
+  notificationType: mysqlEnum("notificationType", ["risk_escalation", "risk_improvement", "scheduled_daily", "manual"]).notNull(),
+  /** Related alert ID if applicable */
+  alertId: int("alertId"),
+  /** Company contract number */
+  contNo: varchar("contNo", { length: 50 }),
+  /** Company name */
+  companyName: varchar("companyName", { length: 255 }),
+  /** Notification title */
+  title: varchar("title", { length: 500 }).notNull(),
+  /** Whether notification was sent successfully */
+  success: boolean("success").default(false).notNull(),
+  /** Error message if failed */
+  errorMessage: text("errorMessage"),
+  /** Timestamp when notification was sent */
+  sentAt: timestamp("sentAt").defaultNow().notNull(),
+});
+
+export type NotificationLog = typeof notificationLog.$inferSelect;
+export type InsertNotificationLog = typeof notificationLog.$inferInsert;
