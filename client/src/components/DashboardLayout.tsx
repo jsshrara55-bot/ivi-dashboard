@@ -1,6 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { Activity, BarChart3, Database, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users, Upload, Bell, Menu, X } from "lucide-react";
+import { Activity, BarChart3, Database, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users, Upload, Bell, Menu, X, ClipboardCheck } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 import { Button } from "./ui/button";
@@ -31,6 +31,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Smart Pre-Auth', href: '/pre-auth', icon: ShieldCheck },
     { name: 'Data Explorer', href: '/data-explorer', icon: Database },
     { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'Evaluation', href: '/evaluation', icon: ClipboardCheck },
   ];
 
   // Admin-only navigation items
