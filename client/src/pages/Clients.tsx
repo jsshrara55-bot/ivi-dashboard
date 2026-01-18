@@ -32,7 +32,9 @@ import {
   Filter,
   Eye,
   ArrowUpDown,
+  FileSpreadsheet,
 } from "lucide-react";
+import * as XLSX from 'xlsx';
 
 type IVIClient = {
   id: number;
@@ -142,6 +144,65 @@ export default function Clients() {
       setSortBy(column);
       setSortOrder("desc");
     }
+  };
+
+  // Export to Excel function
+  const exportToExcel = () => {
+    // Prepare data for export
+    const exportData = filteredClients.map((client, index) => ({
+      '#': index + 1,
+      'اسم الشركة': client.companyName || '-',
+      'الكود': client.contNo,
+      'المنطقة': client.region || '-',
+      'القطاع': client.sector || '-',
+      'IVI Score': client.iviScore ? parseFloat(client.iviScore).toFixed(1) : '-',
+      'H Score': client.hScore ? parseFloat(client.hScore).toFixed(1) : '-',
+      'E Score': client.eScore ? parseFloat(client.eScore).toFixed(1) : '-',
+      'U Score': client.uScore ? parseFloat(client.uScore).toFixed(1) : '-',
+      'فئة المخاطر': client.riskCategory === 'High' ? 'عالية' : client.riskCategory === 'Medium' ? 'متوسطة' : client.riskCategory === 'Low' ? 'منخفضة' : '-',
+      'عدد الموظفين': client.employeeCount || '-',
+      'إجمالي المطالبات': client.totalClaims || '-',
+      'المبلغ المطالب': client.totalClaimed || '-',
+      'المبلغ المعتمد': client.totalApproved || '-',
+    }));
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    
+    // Main data sheet
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    XLSX.utils.book_append_sheet(wb, ws, 'العملاء');
+
+    // Summary sheet
+    const summaryData = [
+      { 'المقياس': 'إجمالي العملاء', 'القيمة': filteredClients.length },
+      { 'المقياس': 'متوسط IVI', 'القيمة': (filteredClients.reduce((sum, c) => sum + parseFloat(c.iviScore || '0'), 0) / (filteredClients.length || 1)).toFixed(1) },
+      { 'المقياس': 'عملاء عالية المخاطر', 'القيمة': filteredClients.filter(c => c.riskCategory === 'High').length },
+      { 'المقياس': 'عملاء متوسطة المخاطر', 'القيمة': filteredClients.filter(c => c.riskCategory === 'Medium').length },
+      { 'المقياس': 'عملاء منخفضة المخاطر', 'القيمة': filteredClients.filter(c => c.riskCategory === 'Low').length },
+      { 'المقياس': 'تاريخ التقرير', 'القيمة': new Date().toLocaleDateString('ar-SA') },
+    ];
+    
+    // Add filter info if any filters applied
+    if (regionFilter !== 'all') {
+      summaryData.push({ 'المقياس': 'فلتر المنطقة', 'القيمة': regionFilter });
+    }
+    if (sectorFilter !== 'all') {
+      summaryData.push({ 'المقياس': 'فلتر القطاع', 'القيمة': sectorFilter });
+    }
+    if (riskFilter !== 'all') {
+      summaryData.push({ 'المقياس': 'فلتر المخاطر', 'القيمة': riskFilter === 'High' ? 'عالية' : riskFilter === 'Medium' ? 'متوسطة' : 'منخفضة' });
+    }
+    if (searchTerm) {
+      summaryData.push({ 'المقياس': 'كلمة البحث', 'القيمة': searchTerm });
+    }
+    
+    const summaryWs = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, summaryWs, 'ملخص');
+
+    // Download file
+    const fileName = `Clients_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
   };
 
   // Stats
@@ -279,6 +340,10 @@ export default function Clients() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>قائمة العملاء ({filteredClients.length})</span>
+              <Button variant="outline" onClick={exportToExcel} className="gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                تصدير Excel
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>

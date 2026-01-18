@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   AlertTriangle, 
   Bell, 
@@ -19,10 +20,27 @@ import {
   TrendingDown, 
   TrendingUp,
   RefreshCw,
-  Send
+  Send,
+  BarChart3,
+  LineChart as LineChartIcon
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
 export default function RiskAlerts() {
   const [sending, setSending] = useState<number | null>(null);
@@ -45,10 +63,18 @@ export default function RiskAlerts() {
 
   const sendAllNotifications = trpc.ivi.riskAlerts.sendAllUnsent.useMutation({
     onSuccess: (result) => {
-      toast.success(`تم معالجة ${result.processed} تنبيه بنجاح`);
+      if (result.sent > 0) {
+        toast.success(`تم إرسال ${result.sent} إشعار بنجاح`);
+      }
+      if (result.skipped > 0) {
+        toast.info(`تم تخطي ${result.skipped} تنبيه (لا يتطلب إشعار)`);
+      }
+      if (result.sent === 0 && result.skipped === 0) {
+        toast.info("لا توجد تنبيهات للإرسال");
+      }
       refetch();
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("فشل إرسال الإشعارات");
     }
   });
@@ -97,6 +123,89 @@ export default function RiskAlerts() {
   const totalAlerts = alerts?.length || 0;
   const escalationAlerts = alerts?.filter(a => isEscalation(a.previousRisk, a.newRisk)).length || 0;
   const improvementAlerts = totalAlerts - escalationAlerts;
+
+  // Prepare chart data - Risk trend over time
+  const trendData = useMemo(() => {
+    if (!alerts || alerts.length === 0) return [];
+    
+    // Group alerts by date
+    const groupedByDate = alerts.reduce((acc, alert) => {
+      const date = alert.createdAt ? new Date(alert.createdAt).toLocaleDateString("ar-SA", { month: 'short', day: 'numeric' }) : 'غير محدد';
+      if (!acc[date]) {
+        acc[date] = { date, escalations: 0, improvements: 0, total: 0 };
+      }
+      if (isEscalation(alert.previousRisk, alert.newRisk)) {
+        acc[date].escalations++;
+      } else {
+        acc[date].improvements++;
+      }
+      acc[date].total++;
+      return acc;
+    }, {} as Record<string, { date: string; escalations: number; improvements: number; total: number }>);
+    
+    return Object.values(groupedByDate).reverse();
+  }, [alerts]);
+
+  // Risk distribution data for pie chart
+  const riskDistributionData = useMemo(() => {
+    if (!alerts || alerts.length === 0) return [];
+    
+    const distribution = {
+      'Low → Medium': 0,
+      'Medium → High': 0,
+      'High → Medium': 0,
+      'Medium → Low': 0,
+    };
+    
+    alerts.forEach(alert => {
+      const key = `${alert.previousRisk} → ${alert.newRisk}`;
+      if (key in distribution) {
+        distribution[key as keyof typeof distribution]++;
+      }
+    });
+    
+    return Object.entries(distribution)
+      .filter(([_, value]) => value > 0)
+      .map(([name, value]) => ({ name, value }));
+  }, [alerts]);
+
+  // Monthly trend data
+  const monthlyTrendData = useMemo(() => {
+    if (!alerts || alerts.length === 0) return [];
+    
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const monthlyData: Record<string, { month: string; escalations: number; improvements: number }> = {};
+    
+    // Initialize last 6 months
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
+      monthlyData[monthKey] = {
+        month: months[d.getMonth()],
+        escalations: 0,
+        improvements: 0,
+      };
+    }
+    
+    alerts.forEach(alert => {
+      if (alert.createdAt) {
+        const d = new Date(alert.createdAt);
+        const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
+        if (monthlyData[monthKey]) {
+          if (isEscalation(alert.previousRisk, alert.newRisk)) {
+            monthlyData[monthKey].escalations++;
+          } else {
+            monthlyData[monthKey].improvements++;
+          }
+        }
+      }
+    });
+    
+    return Object.values(monthlyData);
+  }, [alerts]);
+
+  const COLORS = ['#ef4444', '#f97316', '#22c55e', '#3b82f6'];
 
   return (
     <DashboardLayout>
@@ -184,6 +293,134 @@ export default function RiskAlerts() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Monthly Trend Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LineChartIcon className="h-5 w-5 text-blue-500" />
+                اتجاه التنبيهات الشهري
+              </CardTitle>
+              <CardDescription>
+                مقارنة بين تصعيد وتحسن المخاطر خلال الأشهر الماضية
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {monthlyTrendData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={monthlyTrendData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip 
+                      contentStyle={{ direction: 'rtl', textAlign: 'right' }}
+                      labelStyle={{ fontWeight: 'bold' }}
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="escalations" 
+                      name="تصعيد المخاطر" 
+                      stroke="#ef4444" 
+                      strokeWidth={2}
+                      dot={{ fill: '#ef4444' }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="improvements" 
+                      name="تحسن المخاطر" 
+                      stroke="#22c55e" 
+                      strokeWidth={2}
+                      dot={{ fill: '#22c55e' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[300px] text-gray-500">
+                  <div className="text-center">
+                    <LineChartIcon className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                    <p>لا توجد بيانات كافية لعرض الرسم البياني</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Risk Distribution Pie Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-purple-500" />
+                توزيع تغييرات المخاطر
+              </CardTitle>
+              <CardDescription>
+                أنواع التغييرات في فئات المخاطر
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {riskDistributionData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={riskDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {riskDistributionData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[300px] text-gray-500">
+                  <div className="text-center">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                    <p>لا توجد بيانات كافية لعرض الرسم البياني</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Daily Activity Bar Chart */}
+        {trendData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-indigo-500" />
+                النشاط اليومي للتنبيهات
+              </CardTitle>
+              <CardDescription>
+                عدد التنبيهات حسب اليوم
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip 
+                    contentStyle={{ direction: 'rtl', textAlign: 'right' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="escalations" name="تصعيد" fill="#ef4444" />
+                  <Bar dataKey="improvements" name="تحسن" fill="#22c55e" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Alerts Table */}
         <Card>

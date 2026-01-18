@@ -89,3 +89,9 @@
 - [x] Create Risk Alerts management page in Admin Panel
 - [x] Add Excel export functionality alongside PDF
 - [x] Test all new features
+
+## Phase 13: Advanced Features
+- [x] Add interactive charts to Risk Alerts page (trend over time)
+- [x] Add Excel export to Clients page with applied filters
+- [x] Set up automatic email notifications for risk alerts (using Manus notification system)
+- [x] Test all new features

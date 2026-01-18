@@ -575,32 +575,71 @@ export const appRouter = router({
       sendAllUnsent: adminProcedure.mutation(async () => {
         const alerts = await getUnsentRiskAlerts();
         const results = [];
+        let sentCount = 0;
+        let skippedCount = 0;
 
         for (const alert of alerts) {
           // Only send notifications for Medium -> High escalations
           if (alert.previousRisk === 'Medium' && alert.newRisk === 'High') {
             const title = `⚠️ تنبيه عاجل: ارتفاع مستوى المخاطر - ${alert.companyName}`;
             const content = `ارتفع مستوى المخاطر للشركة "${alert.companyName}" من "متوسطة" إلى "عالية"\n\n` +
-              `رقم العقد: ${alert.contNo}\n` +
-              `الدرجة السابقة: ${alert.previousScore || '-'}\n` +
-              `الدرجة الجديدة: ${alert.newScore || '-'}\n\n` +
-              `يرجى اتخاذ الإجراءات اللازمة لمراجعة هذا العميل.`;
+              `📋 تفاصيل التنبيه:\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+              `🏢 الشركة: ${alert.companyName}\n` +
+              `📄 رقم العقد: ${alert.contNo}\n` +
+              `📊 الدرجة السابقة: ${alert.previousScore || '-'}\n` +
+              `📈 الدرجة الجديدة: ${alert.newScore || '-'}\n` +
+              `📅 التاريخ: ${new Date().toLocaleDateString('ar-SA')}\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+              `⚡ الإجراء المطلوب:\n` +
+              `يرجى مراجعة هذا العميل واتخاذ الإجراءات اللازمة لتقليل مستوى المخاطر.\n\n` +
+              `🔗 يمكنك الوصول إلى لوحة التحكم لمزيد من التفاصيل.`;
 
             const success = await notifyOwner({ title, content });
             
             if (success) {
               await markAlertAsSent(alert.id);
+              sentCount++;
             }
 
-            results.push({ alertId: alert.id, success });
+            results.push({ alertId: alert.id, success, type: 'escalation' });
+          } else if (alert.previousRisk === 'High' && (alert.newRisk === 'Medium' || alert.newRisk === 'Low')) {
+            // Send positive notification for risk improvement from High
+            const title = `✅ تحسن مستوى المخاطر - ${alert.companyName}`;
+            const content = `انخفض مستوى المخاطر للشركة "${alert.companyName}"\n\n` +
+              `📋 تفاصيل التحسن:\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+              `🏢 الشركة: ${alert.companyName}\n` +
+              `📄 رقم العقد: ${alert.contNo}\n` +
+              `📉 الفئة السابقة: عالية\n` +
+              `✨ الفئة الجديدة: ${alert.newRisk === 'Medium' ? 'متوسطة' : 'منخفضة'}\n` +
+              `📊 الدرجة السابقة: ${alert.previousScore || '-'}\n` +
+              `📈 الدرجة الجديدة: ${alert.newScore || '-'}\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+              `🎉 هذا تحسن إيجابي في أداء العميل!`;
+
+            const success = await notifyOwner({ title, content });
+            
+            if (success) {
+              await markAlertAsSent(alert.id);
+              sentCount++;
+            }
+
+            results.push({ alertId: alert.id, success, type: 'improvement' });
           } else {
-            // Mark non-escalation alerts as sent without notification
+            // Mark other alerts as sent without notification
             await markAlertAsSent(alert.id);
-            results.push({ alertId: alert.id, success: true, skipped: true });
+            skippedCount++;
+            results.push({ alertId: alert.id, success: true, skipped: true, type: 'other' });
           }
         }
 
-        return { processed: results.length, results };
+        return { 
+          processed: results.length, 
+          sent: sentCount,
+          skipped: skippedCount,
+          results 
+        };
       }),
     }),
   }),
