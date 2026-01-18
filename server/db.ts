@@ -12,7 +12,9 @@ import {
   InsertRequirement,
   InsertPreAuthRequest,
   InsertRequestDocument,
-  InsertRequestChecklistItem
+  InsertRequestChecklistItem,
+  riskChangeAlerts,
+  InsertRiskChangeAlert
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -757,4 +759,89 @@ export async function clearAllIviData() {
   await db.delete(members);
   await db.delete(providers);
   await db.delete(corporateClients);
+}
+
+
+// ==================== Risk Change Alerts ====================
+
+export async function createRiskChangeAlert(alert: InsertRiskChangeAlert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(riskChangeAlerts).values(alert);
+  return result[0].insertId;
+}
+
+export async function getRiskChangeAlerts(limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(riskChangeAlerts).orderBy(desc(riskChangeAlerts.createdAt)).limit(limit);
+}
+
+export async function getUnsentRiskAlerts() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(riskChangeAlerts).where(eq(riskChangeAlerts.notificationSent, false));
+}
+
+export async function markAlertAsSent(alertId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(riskChangeAlerts)
+    .set({ notificationSent: true, notificationSentAt: new Date() })
+    .where(eq(riskChangeAlerts.id, alertId));
+}
+
+export async function checkAndCreateRiskAlerts(newScores: { contNo: string; companyName?: string | null; iviScore?: string | null; riskCategory?: "Low" | "Medium" | "High" | null }[]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const alerts: InsertRiskChangeAlert[] = [];
+  
+  // Get current scores for comparison
+  const currentScores = await db.select().from(iviScores);
+  const currentScoresMap = new Map(currentScores.map(s => [s.contNo, s]));
+  
+  for (const newScore of newScores) {
+    const current = currentScoresMap.get(newScore.contNo);
+    if (!current) continue;
+    
+    const currentRisk = current.riskCategory;
+    const newRisk = newScore.riskCategory;
+    
+    // Check if risk changed from Medium to High (escalation)
+    if (currentRisk === "Medium" && newRisk === "High") {
+      alerts.push({
+        contNo: newScore.contNo,
+        companyName: newScore.companyName || current.companyName,
+        previousRisk: "Medium",
+        newRisk: "High",
+        previousScore: current.iviScore,
+        newScore: newScore.iviScore,
+        notificationSent: false,
+      });
+    }
+    // Also track High to Medium (improvement) for reporting
+    else if (currentRisk === "High" && newRisk === "Medium") {
+      alerts.push({
+        contNo: newScore.contNo,
+        companyName: newScore.companyName || current.companyName,
+        previousRisk: "High",
+        newRisk: "Medium",
+        previousScore: current.iviScore,
+        newScore: newScore.iviScore,
+        notificationSent: false,
+      });
+    }
+  }
+  
+  // Insert all alerts
+  for (const alert of alerts) {
+    await createRiskChangeAlert(alert);
+  }
+  
+  return alerts;
 }

@@ -71,3 +71,14 @@
 - [x] Add interactive filters (region, sector, risk category)
 - [x] Add PDF export button for reports
 - [x] Test all features
+
+## Phase 11: New Features and Bug Fixes
+- [x] Fix Clients page (not working when clicked)
+- [x] Fix Analytics page (not working when clicked)
+- [x] Create Client Details page with full history (members, claims, calls)
+- [x] Add region filters to Predictions page
+- [x] Add performance comparison chart in Analytics
+- [x] Add email notifications system for risk category changes (Medium -> High)
+- [x] Create risk_change_alerts database table
+- [x] Add API endpoints for risk alerts management
+- [x] Review and validate all data

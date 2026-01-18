@@ -52,7 +52,13 @@ import {
   bulkInsertInsurancePreAuths,
   bulkInsertCalls,
   bulkInsertIviScores,
+  // Risk Alerts
+  getRiskChangeAlerts,
+  getUnsentRiskAlerts,
+  markAlertAsSent,
+  createRiskChangeAlert,
 } from "./db";
+import { notifyOwner } from "./_core/notification";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 
@@ -429,6 +435,19 @@ export const appRouter = router({
       }),
     }),
 
+    // Client Details (combined data)
+    clientDetails: publicProcedure
+      .input(z.object({ contNo: z.string() }))
+      .query(async ({ input }) => {
+        const [client, members, claims, calls] = await Promise.all([
+          getIviScoreByContNo(input.contNo),
+          getMembersByContNo(input.contNo),
+          getClaimsByContNo(input.contNo),
+          getCallsByContNo(input.contNo),
+        ]);
+        return { client, members, claims, calls };
+      }),
+
     // Call Center
     calls: router({
       list: publicProcedure.query(async () => {
@@ -491,6 +510,98 @@ export const appRouter = router({
           }
           return { success: true };
         }),
+    }),
+
+    // Risk Change Alerts
+    riskAlerts: router({
+      list: protectedProcedure.query(async () => {
+        return getRiskChangeAlerts();
+      }),
+
+      getUnsent: adminProcedure.query(async () => {
+        return getUnsentRiskAlerts();
+      }),
+
+      create: adminProcedure
+        .input(z.object({
+          contNo: z.string(),
+          companyName: z.string().optional(),
+          previousRisk: z.enum(["Low", "Medium", "High"]),
+          newRisk: z.enum(["Low", "Medium", "High"]),
+          previousScore: z.string().optional(),
+          newScore: z.string().optional(),
+        }))
+        .mutation(async ({ input }) => {
+          const id = await createRiskChangeAlert({
+            contNo: input.contNo,
+            companyName: input.companyName,
+            previousRisk: input.previousRisk,
+            newRisk: input.newRisk,
+            previousScore: input.previousScore,
+            newScore: input.newScore,
+            notificationSent: false,
+          });
+          return { id };
+        }),
+
+      sendNotification: adminProcedure
+        .input(z.object({ alertId: z.number() }))
+        .mutation(async ({ input }) => {
+          const alerts = await getUnsentRiskAlerts();
+          const alert = alerts.find(a => a.id === input.alertId);
+          
+          if (!alert) {
+            throw new TRPCError({ code: 'NOT_FOUND', message: 'Alert not found' });
+          }
+
+          // Send notification to owner
+          const title = `تنبيه: تغيير فئة المخاطر - ${alert.companyName}`;
+          const content = `تغيرت فئة المخاطر للشركة "${alert.companyName}" (رقم العقد: ${alert.contNo})\n\n` +
+            `الفئة السابقة: ${alert.previousRisk === 'High' ? 'عالية' : alert.previousRisk === 'Medium' ? 'متوسطة' : 'منخفضة'}\n` +
+            `الفئة الجديدة: ${alert.newRisk === 'High' ? 'عالية' : alert.newRisk === 'Medium' ? 'متوسطة' : 'منخفضة'}\n` +
+            `الدرجة السابقة: ${alert.previousScore || '-'}\n` +
+            `الدرجة الجديدة: ${alert.newScore || '-'}\n\n` +
+            `يرجى مراجعة لوحة التحكم للمزيد من التفاصيل.`;
+
+          const success = await notifyOwner({ title, content });
+          
+          if (success) {
+            await markAlertAsSent(input.alertId);
+          }
+
+          return { success };
+        }),
+
+      sendAllUnsent: adminProcedure.mutation(async () => {
+        const alerts = await getUnsentRiskAlerts();
+        const results = [];
+
+        for (const alert of alerts) {
+          // Only send notifications for Medium -> High escalations
+          if (alert.previousRisk === 'Medium' && alert.newRisk === 'High') {
+            const title = `⚠️ تنبيه عاجل: ارتفاع مستوى المخاطر - ${alert.companyName}`;
+            const content = `ارتفع مستوى المخاطر للشركة "${alert.companyName}" من "متوسطة" إلى "عالية"\n\n` +
+              `رقم العقد: ${alert.contNo}\n` +
+              `الدرجة السابقة: ${alert.previousScore || '-'}\n` +
+              `الدرجة الجديدة: ${alert.newScore || '-'}\n\n` +
+              `يرجى اتخاذ الإجراءات اللازمة لمراجعة هذا العميل.`;
+
+            const success = await notifyOwner({ title, content });
+            
+            if (success) {
+              await markAlertAsSent(alert.id);
+            }
+
+            results.push({ alertId: alert.id, success });
+          } else {
+            // Mark non-escalation alerts as sent without notification
+            await markAlertAsSent(alert.id);
+            results.push({ alertId: alert.id, success: true, skipped: true });
+          }
+        }
+
+        return { processed: results.length, results };
+      }),
     }),
   }),
 });

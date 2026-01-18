@@ -9,15 +9,20 @@ import SmartPreAuth from "./pages/SmartPreAuth";
 import AdminPanel from "./pages/AdminPanel";
 import DataExplorer from "./pages/DataExplorer";
 import DataLoader from "./pages/DataLoader";
+import Clients from "./pages/Clients";
+import Analytics from "./pages/Analytics";
+import ClientDetails from "./pages/ClientDetails";
+import Predictions from "./pages/Predictions";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Dashboard} />
-      <Route path={"/clients"} component={Dashboard} />
-      <Route path={"/analytics"} component={Dashboard} />
-      <Route path={"/predictions"} component={Dashboard} />
+      <Route path={"/clients"} component={Clients} />
+      <Route path={"/client/:contNo"} component={ClientDetails} />
+      <Route path={"/analytics"} component={Analytics} />
+      <Route path={"/predictions"} component={Predictions} />
       <Route path={"/settings"} component={Dashboard} />
       <Route path={"/pre-auth"} component={SmartPreAuth} />
       <Route path={"/admin"} component={AdminPanel} />

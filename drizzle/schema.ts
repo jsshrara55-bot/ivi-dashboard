@@ -306,3 +306,23 @@ export const iviScores = mysqlTable("ivi_scores", {
 
 export type IviScore = typeof iviScores.$inferSelect;
 export type InsertIviScore = typeof iviScores.$inferInsert;
+
+/**
+ * Risk Change Alerts - تنبيهات تغيير فئة المخاطر
+ * Stores alerts when a company's risk category changes
+ */
+export const riskChangeAlerts = mysqlTable("risk_change_alerts", {
+  id: int("id").autoincrement().primaryKey(),
+  contNo: varchar("contNo", { length: 50 }).notNull(),
+  companyName: varchar("companyName", { length: 255 }),
+  previousRisk: mysqlEnum("previousRisk", ["Low", "Medium", "High"]).notNull(),
+  newRisk: mysqlEnum("newRisk", ["Low", "Medium", "High"]).notNull(),
+  previousScore: decimal("previousScore", { precision: 5, scale: 2 }),
+  newScore: decimal("newScore", { precision: 5, scale: 2 }),
+  notificationSent: boolean("notificationSent").default(false).notNull(),
+  notificationSentAt: timestamp("notificationSentAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RiskChangeAlert = typeof riskChangeAlerts.$inferSelect;
+export type InsertRiskChangeAlert = typeof riskChangeAlerts.$inferInsert;
