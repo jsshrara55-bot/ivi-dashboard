@@ -14,6 +14,7 @@ import Analytics from "./pages/Analytics";
 import ClientDetails from "./pages/ClientDetails";
 import Predictions from "./pages/Predictions";
 import RiskAlerts from "./pages/RiskAlerts";
+import Settings from "./pages/Settings";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -24,7 +25,7 @@ function Router() {
       <Route path={"/client/:contNo"} component={ClientDetails} />
       <Route path={"/analytics"} component={Analytics} />
       <Route path={"/predictions"} component={Predictions} />
-      <Route path={"/settings"} component={Dashboard} />
+      <Route path={"/settings"} component={Settings} />
       <Route path={"/pre-auth"} component={SmartPreAuth} />
       <Route path={"/admin"} component={AdminPanel} />
       <Route path={"/data-explorer"} component={DataExplorer} />

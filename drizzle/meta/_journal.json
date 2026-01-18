@@ -36,6 +36,13 @@
       "when": 1768750197649,
       "tag": "0004_lucky_gambit",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1768758329649,
+      "tag": "0005_previous_karnak",
+      "breakpoints": true
     }
   ]
 }

@@ -61,6 +61,9 @@ import {
   getSchedulerSettings,
   createOrUpdateSchedulerSettings,
   getNotificationLogs,
+  // User Settings
+  getUserSettings,
+  createOrUpdateUserSettings,
 } from "./db";
 import {
   startScheduler,
@@ -740,6 +743,64 @@ export const appRouter = router({
         .query(async ({ input }) => {
           return getNotificationLogs(input?.limit || 100);
         }),
+    }),
+  }),
+
+  // ==================== User Settings ====================
+  userSettings: router({
+    get: protectedProcedure.query(async ({ ctx }) => {
+      const settings = await getUserSettings(ctx.user.id);
+      if (!settings) {
+        // Return default settings if none exist
+        return {
+          userId: ctx.user.id,
+          language: "en" as const,
+          theme: "system" as const,
+          displayDensity: "comfortable" as const,
+          emailNotifications: true,
+          riskAlertNotifications: true,
+          dailySummaryNotifications: false,
+          notificationSound: true,
+          defaultDashboardView: "overview" as const,
+          itemsPerPage: 10,
+          showTooltips: true,
+        };
+      }
+      return settings;
+    }),
+
+    update: protectedProcedure
+      .input(z.object({
+        language: z.enum(["ar", "en"]).optional(),
+        theme: z.enum(["light", "dark", "system"]).optional(),
+        displayDensity: z.enum(["compact", "comfortable", "spacious"]).optional(),
+        emailNotifications: z.boolean().optional(),
+        riskAlertNotifications: z.boolean().optional(),
+        dailySummaryNotifications: z.boolean().optional(),
+        notificationSound: z.boolean().optional(),
+        defaultDashboardView: z.enum(["overview", "analytics", "predictions"]).optional(),
+        itemsPerPage: z.number().min(5).max(100).optional(),
+        showTooltips: z.boolean().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await createOrUpdateUserSettings(ctx.user.id, input);
+        return { success: true };
+      }),
+
+    reset: protectedProcedure.mutation(async ({ ctx }) => {
+      await createOrUpdateUserSettings(ctx.user.id, {
+        language: "en",
+        theme: "system",
+        displayDensity: "comfortable",
+        emailNotifications: true,
+        riskAlertNotifications: true,
+        dailySummaryNotifications: false,
+        notificationSound: true,
+        defaultDashboardView: "overview",
+        itemsPerPage: 10,
+        showTooltips: true,
+      });
+      return { success: true };
     }),
   }),
 });

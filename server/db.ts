@@ -18,7 +18,9 @@ import {
   notificationScheduler,
   InsertNotificationScheduler,
   notificationLog,
-  InsertNotificationLog
+  InsertNotificationLog,
+  userSettings,
+  InsertUserSettings
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -939,4 +941,52 @@ export async function getNotificationLogsByType(type: "risk_escalation" | "risk_
     .where(eq(notificationLog.notificationType, type))
     .orderBy(desc(notificationLog.sentAt))
     .limit(limit);
+}
+
+
+// ==================== User Settings ====================
+
+export async function getUserSettings(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const settings = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).limit(1);
+  return settings[0] || null;
+}
+
+export async function createOrUpdateUserSettings(userId: number, settings: Partial<InsertUserSettings>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await getUserSettings(userId);
+  
+  if (existing) {
+    await db.update(userSettings)
+      .set({ ...settings, updatedAt: new Date() })
+      .where(eq(userSettings.userId, userId));
+    return existing.id;
+  } else {
+    const result = await db.insert(userSettings).values({
+      userId,
+      language: settings.language ?? "en",
+      theme: settings.theme ?? "system",
+      displayDensity: settings.displayDensity ?? "comfortable",
+      emailNotifications: settings.emailNotifications ?? true,
+      riskAlertNotifications: settings.riskAlertNotifications ?? true,
+      dailySummaryNotifications: settings.dailySummaryNotifications ?? false,
+      notificationSound: settings.notificationSound ?? true,
+      defaultDashboardView: settings.defaultDashboardView ?? "overview",
+      itemsPerPage: settings.itemsPerPage ?? 10,
+      showTooltips: settings.showTooltips ?? true,
+      ...settings
+    });
+    return result[0].insertId;
+  }
+}
+
+export async function deleteUserSettings(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(userSettings).where(eq(userSettings.userId, userId));
 }

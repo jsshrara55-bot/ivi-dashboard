@@ -384,3 +384,38 @@ export const notificationLog = mysqlTable("notification_log", {
 
 export type NotificationLog = typeof notificationLog.$inferSelect;
 export type InsertNotificationLog = typeof notificationLog.$inferInsert;
+
+/**
+ * User Settings - إعدادات المستخدم
+ * Stores user preferences for language, notifications, and display
+ */
+export const userSettings = mysqlTable("user_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  /** User ID (foreign key to users table) */
+  userId: int("userId").notNull().unique(),
+  /** Preferred language: ar (Arabic) or en (English) */
+  language: mysqlEnum("language", ["ar", "en"]).default("en").notNull(),
+  /** Theme preference: light, dark, or system */
+  theme: mysqlEnum("theme", ["light", "dark", "system"]).default("system").notNull(),
+  /** Display density: compact, comfortable, or spacious */
+  displayDensity: mysqlEnum("displayDensity", ["compact", "comfortable", "spacious"]).default("comfortable").notNull(),
+  /** Enable email notifications */
+  emailNotifications: boolean("emailNotifications").default(true).notNull(),
+  /** Enable risk alert notifications */
+  riskAlertNotifications: boolean("riskAlertNotifications").default(true).notNull(),
+  /** Enable daily summary notifications */
+  dailySummaryNotifications: boolean("dailySummaryNotifications").default(false).notNull(),
+  /** Enable sound for notifications */
+  notificationSound: boolean("notificationSound").default(true).notNull(),
+  /** Default dashboard view: overview, analytics, or predictions */
+  defaultDashboardView: mysqlEnum("defaultDashboardView", ["overview", "analytics", "predictions"]).default("overview").notNull(),
+  /** Number of items per page in tables */
+  itemsPerPage: int("itemsPerPage").default(10).notNull(),
+  /** Show tooltips */
+  showTooltips: boolean("showTooltips").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserSettings = typeof userSettings.$inferSelect;
+export type InsertUserSettings = typeof userSettings.$inferInsert;
