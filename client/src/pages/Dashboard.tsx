@@ -155,14 +155,14 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <h2>${isArabic ? 'مصفوفة أداء العملاء' : 'Client Performance Matrix'}</h2>
+        <h2>${isArabic ? 'مصفوفة أداء الشركات' : 'Client Performance Matrix'}</h2>
         <table>
           <thead>
             <tr>
               <th>${isArabic ? 'رقم العميل' : 'Client ID'}</th>
               <th>${isArabic ? 'اسم الشركة' : 'Company Name'}</th>
               <th>${isArabic ? 'المنطقة' : 'Region'}</th>
-              <th>${isArabic ? 'القطاع' : 'Sector'}</th>
+              <th>${isArabic ? 'أخرى' : 'Others'}</th>
               <th>${isArabic ? 'فئة المخاطر' : 'Risk Category'}</th>
               <th>${isArabic ? 'نقاط H' : 'H Score'}</th>
               <th>${isArabic ? 'نقاط E' : 'E Score'}</th>
@@ -218,7 +218,7 @@ export default function Dashboard() {
       [isArabic ? 'رقم العميل' : 'Client ID']: score.CONT_NO,
       [isArabic ? 'اسم الشركة' : 'Company Name']: score.Company_Name || '-',
       [isArabic ? 'المنطقة' : 'Region']: score.Region || '-',
-      [isArabic ? 'القطاع' : 'Sector']: score.Sector || '-',
+      [isArabic ? 'أخرى' : 'Others']: score.Sector || '-',
       [isArabic ? 'فئة المخاطر' : 'Risk Category']: translateRisk(score.Risk_Category),
       [isArabic ? 'نقاط H' : 'H Score']: score.H_score.toFixed(1),
       [isArabic ? 'نقاط E' : 'E Score']: score.E_score.toFixed(1),
@@ -269,7 +269,7 @@ export default function Dashboard() {
     const sectorData = sectors.map(sector => {
       const sectorScores = filteredScores.filter(s => s.Sector === sector);
       return {
-        [isArabic ? 'القطاع' : 'Sector']: sector,
+        [isArabic ? 'أخرى' : 'Others']: sector,
         [isArabic ? 'الإجمالي' : 'Total']: sectorScores.length,
         [isArabic ? 'مخاطر عالية' : 'High Risk']: sectorScores.filter(s => s.Risk_Category === 'High Risk').length,
         [isArabic ? 'مخاطر متوسطة' : 'Medium Risk']: sectorScores.filter(s => s.Risk_Category === 'Medium Risk').length,
@@ -279,7 +279,7 @@ export default function Dashboard() {
     });
     if (sectorData.length > 0) {
       const sectorWs = XLSX.utils.json_to_sheet(sectorData);
-      XLSX.utils.book_append_sheet(wb, sectorWs, isArabic ? 'حسب القطاع' : 'By Sector');
+      XLSX.utils.book_append_sheet(wb, sectorWs, isArabic ? 'حسب الفئة' : 'By Category');
     }
 
     // Download file
@@ -709,7 +709,7 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle>{t('dashboard.riskDistribution')}</CardTitle>
                   <CardDescription>
-                    {language === 'ar' ? 'تقسيم محفظة العملاء حسب فئة المخاطر' : 'Client portfolio segmentation by risk category'}
+                    {language === 'ar' ? 'تقسيم محفظة الشركات حسب فئة المخاطر' : 'Client portfolio segmentation by risk category'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pl-2">
@@ -758,7 +758,7 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle>{t('dashboard.topRiskDrivers')}</CardTitle>
                 <CardDescription>
-                  {language === 'ar' ? 'العوامل الرئيسية المؤثرة على الاحتفاظ بالعملاء ونقاط IVI' : 'Key factors influencing client retention and IVI scores'}
+                  {language === 'ar' ? 'العوامل الرئيسية المؤثرة على الاحتفاظ بالشركات ونقاط IVI' : 'Key factors influencing client retention and IVI scores'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -770,8 +770,8 @@ export default function Dashboard() {
           <TabsContent value="analytics" className="space-y-4">
             <Card className="swiss-card">
               <CardHeader>
-                <CardTitle>{language === 'ar' ? 'مصفوفة أداء العملاء' : 'Client Performance Matrix'}</CardTitle>
-                <CardDescription>{language === 'ar' ? 'تفصيل نقاط IVI لجميع العملاء' : 'Detailed breakdown of IVI scores for all clients'}</CardDescription>
+                <CardTitle>{language === 'ar' ? 'مصفوفة أداء الشركات' : 'Client Performance Matrix'}</CardTitle>
+                <CardDescription>{language === 'ar' ? 'تفصيل نقاط IVI لجميع الشركات' : 'Detailed breakdown of IVI scores for all clients'}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="relative w-full overflow-auto">

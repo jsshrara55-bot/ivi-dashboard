@@ -2,7 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, Building, TrendingUp, TrendingDown, Activity, Users, DollarSign, Target, AlertTriangle, CheckCircle, ArrowUpRight, ArrowDownRight, BarChart3, PieChart } from "lucide-react";
+import { Building2, Building, TrendingUp, TrendingDown, Activity, Users, DollarSign, Target, AlertTriangle, CheckCircle, ArrowUpRight, ArrowDownRight, BarChart3, PieChart, Hospital, Stethoscope, Pill, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart as RechartsPieChart, Pie, Cell } from "recharts";
 
@@ -92,6 +92,41 @@ const forecastData = [
 const distributionData = [
   { name: "SME", value: smeData.totalCompanies, color: "#3B82F6" },
   { name: "Key Account", value: keyAccountData.totalCompanies, color: "#8B5CF6" },
+];
+
+// Providers Data
+const providersData = {
+  totalProviders: 156,
+  hospitals: 45,
+  clinics: 78,
+  pharmacies: 33,
+  totalPreAuths: 12847,
+  approvedRate: 78.5,
+  rejectedRate: 21.5,
+  avgProcessingTime: 2.3,
+  topProviders: [
+    { name: "King Faisal Specialist Hospital", type: "Hospital", preAuths: 1245, approvalRate: 82.3 },
+    { name: "Saudi German Hospital", type: "Hospital", preAuths: 987, approvalRate: 79.8 },
+    { name: "Dr. Sulaiman Al Habib", type: "Hospital", preAuths: 876, approvalRate: 85.2 },
+    { name: "Al Mouwasat Hospital", type: "Hospital", preAuths: 654, approvalRate: 77.4 },
+    { name: "Dallah Hospital", type: "Hospital", preAuths: 543, approvalRate: 81.1 },
+  ],
+  byCategory: {
+    sme: { preAuths: 4521, approvalRate: 81.2, avgCost: 2450 },
+    keyAccount: { preAuths: 8326, approvalRate: 76.8, avgCost: 3120 },
+  },
+  byType: [
+    { type: "Hospital", count: 45, preAuths: 8234, approvalRate: 75.3, color: "#EF4444" },
+    { type: "Clinic", count: 78, preAuths: 3456, approvalRate: 84.7, color: "#10B981" },
+    { type: "Pharmacy", count: 33, preAuths: 1157, approvalRate: 92.1, color: "#3B82F6" },
+  ],
+};
+
+// Provider comparison by company category
+const providerCategoryComparison = [
+  { metric: "Pre-Auths", sme: providersData.byCategory.sme.preAuths, keyAccount: providersData.byCategory.keyAccount.preAuths },
+  { metric: "Approval Rate", sme: providersData.byCategory.sme.approvalRate, keyAccount: providersData.byCategory.keyAccount.approvalRate },
+  { metric: "Avg Cost (SAR)", sme: providersData.byCategory.sme.avgCost, keyAccount: providersData.byCategory.keyAccount.avgCost },
 ];
 
 export default function CategoryAnalysis() {
@@ -249,11 +284,12 @@ export default function CategoryAnalysis() {
 
         {/* Charts Section */}
         <Tabs defaultValue="comparison" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="comparison">{isRTL ? "المقارنة" : "Comparison"}</TabsTrigger>
             <TabsTrigger value="forecast">{isRTL ? "التوقعات" : "Forecast"}</TabsTrigger>
             <TabsTrigger value="radar">{isRTL ? "الرادار" : "Radar"}</TabsTrigger>
             <TabsTrigger value="insights">{isRTL ? "الرؤى" : "Insights"}</TabsTrigger>
+            <TabsTrigger value="providers">{isRTL ? "مقدمو الخدمات" : "Providers"}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="comparison">
@@ -430,6 +466,187 @@ export default function CategoryAnalysis() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="providers">
+            <div className="grid gap-4 md:grid-cols-3">
+              {/* Provider Summary Cards */}
+              <Card className="border-red-200 bg-gradient-to-br from-red-50 to-white">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-red-700">
+                    <Hospital className="h-5 w-5" />
+                    {isRTL ? "المستشفيات" : "Hospitals"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-red-600">{providersData.hospitals}</div>
+                  <div className="text-sm text-muted-foreground">{isRTL ? `${providersData.byType[0].preAuths.toLocaleString()} موافقة مسبقة` : `${providersData.byType[0].preAuths.toLocaleString()} pre-auths`}</div>
+                  <div className="text-sm text-green-600">{providersData.byType[0].approvalRate}% {isRTL ? "معدل الموافقة" : "approval rate"}</div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-green-200 bg-gradient-to-br from-green-50 to-white">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-green-700">
+                    <Stethoscope className="h-5 w-5" />
+                    {isRTL ? "العيادات" : "Clinics"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-green-600">{providersData.clinics}</div>
+                  <div className="text-sm text-muted-foreground">{isRTL ? `${providersData.byType[1].preAuths.toLocaleString()} موافقة مسبقة` : `${providersData.byType[1].preAuths.toLocaleString()} pre-auths`}</div>
+                  <div className="text-sm text-green-600">{providersData.byType[1].approvalRate}% {isRTL ? "معدل الموافقة" : "approval rate"}</div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-blue-700">
+                    <Pill className="h-5 w-5" />
+                    {isRTL ? "الصيدليات" : "Pharmacies"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-blue-600">{providersData.pharmacies}</div>
+                  <div className="text-sm text-muted-foreground">{isRTL ? `${providersData.byType[2].preAuths.toLocaleString()} موافقة مسبقة` : `${providersData.byType[2].preAuths.toLocaleString()} pre-auths`}</div>
+                  <div className="text-sm text-green-600">{providersData.byType[2].approvalRate}% {isRTL ? "معدل الموافقة" : "approval rate"}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Provider Performance by Category */}
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>{isRTL ? "أداء مقدمي الخدمات حسب فئة الشركات" : "Provider Performance by Company Category"}</CardTitle>
+                <CardDescription>
+                  {isRTL ? "مقارنة استخدام مقدمي الخدمات بين SME و Key Account" : "Comparing provider utilization between SME and Key Account"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                      <Building2 className="h-5 w-5" />
+                      SME
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">{isRTL ? "الموافقات المسبقة" : "Pre-Authorizations"}</span>
+                        <span className="font-bold">{providersData.byCategory.sme.preAuths.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">{isRTL ? "معدل الموافقة" : "Approval Rate"}</span>
+                        <span className="font-bold text-green-600">{providersData.byCategory.sme.approvalRate}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">{isRTL ? "متوسط التكلفة" : "Avg Cost"}</span>
+                        <span className="font-bold">{providersData.byCategory.sme.avgCost.toLocaleString()} SAR</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <h4 className="font-semibold text-purple-800 mb-3 flex items-center gap-2">
+                      <Building className="h-5 w-5" />
+                      Key Account
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">{isRTL ? "الموافقات المسبقة" : "Pre-Authorizations"}</span>
+                        <span className="font-bold">{providersData.byCategory.keyAccount.preAuths.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">{isRTL ? "معدل الموافقة" : "Approval Rate"}</span>
+                        <span className="font-bold text-yellow-600">{providersData.byCategory.keyAccount.approvalRate}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">{isRTL ? "متوسط التكلفة" : "Avg Cost"}</span>
+                        <span className="font-bold">{providersData.byCategory.keyAccount.avgCost.toLocaleString()} SAR</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Top Providers Table */}
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>{isRTL ? "أفضل مقدمي الخدمات" : "Top Providers"}</CardTitle>
+                <CardDescription>
+                  {isRTL ? "مقدمو الخدمات الأكثر استخداماً" : "Most utilized healthcare providers"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2">{isRTL ? "المزود" : "Provider"}</th>
+                        <th className="text-left py-2">{isRTL ? "النوع" : "Type"}</th>
+                        <th className="text-right py-2">{isRTL ? "الموافقات" : "Pre-Auths"}</th>
+                        <th className="text-right py-2">{isRTL ? "معدل الموافقة" : "Approval Rate"}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {providersData.topProviders.map((provider, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="py-2 font-medium">{provider.name}</td>
+                          <td className="py-2">
+                            <Badge variant="outline" className="text-xs">
+                              <Hospital className="h-3 w-3 mr-1" />
+                              {provider.type}
+                            </Badge>
+                          </td>
+                          <td className="py-2 text-right">{provider.preAuths.toLocaleString()}</td>
+                          <td className="py-2 text-right">
+                            <span className={provider.approvalRate >= 80 ? "text-green-600" : "text-yellow-600"}>
+                              {provider.approvalRate}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Provider Insights */}
+            <div className="grid gap-4 md:grid-cols-2 mt-4">
+              <Card className="border-green-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-700">
+                    <ThumbsUp className="h-5 w-5" />
+                    {isRTL ? "نقاط القوة" : "Strengths"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• {isRTL ? "معدل موافقة عالي للصيدليات (92.1%)" : "High approval rate for pharmacies (92.1%)"}</li>
+                    <li>• {isRTL ? "معدل موافقة أعلى لشركات SME (81.2%)" : "Higher approval rate for SME companies (81.2%)"}</li>
+                    <li>• {isRTL ? "متوسط تكلفة أقل لشركات SME (2,450 SAR)" : "Lower avg cost for SME companies (2,450 SAR)"}</li>
+                    <li>• {isRTL ? "شبكة واسعة من العيادات (78 عيادة)" : "Wide network of clinics (78 clinics)"}</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="border-red-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-red-700">
+                    <ThumbsDown className="h-5 w-5" />
+                    {isRTL ? "نقاط الضعف" : "Weaknesses"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• {isRTL ? "معدل موافقة منخفض للمستشفيات (75.3%)" : "Lower approval rate for hospitals (75.3%)"}</li>
+                    <li>• {isRTL ? "معدل موافقة أقل لشركات Key Account (76.8%)" : "Lower approval rate for Key Account (76.8%)"}</li>
+                    <li>• {isRTL ? "تكلفة أعلى لشركات Key Account (3,120 SAR)" : "Higher cost for Key Account (3,120 SAR)"}</li>
+                    <li>• {isRTL ? "معدل رفض عام 21.5%" : "Overall rejection rate of 21.5%"}</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

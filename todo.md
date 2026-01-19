@@ -230,3 +230,18 @@
 - [x] Support Arabic/English translations
 - [x] Add route and sidebar link
 - [x] Test and save checkpoint
+
+## Phase 28: Providers Analysis Integration
+- [x] Add Providers section to Category Analysis page
+- [x] Include provider statistics (hospitals, clinics, pharmacies)
+- [x] Add approval/rejection rate comparison
+- [x] Add provider performance by company category (SME vs Key Account)
+- [x] Add provider type distribution charts
+- [x] Support Arabic/English translations
+- [x] Test and save checkpoint
+
+## Phase 29: Text Changes and Providers Analysis
+- [x] Change "القطاع" to "أخرى" (Others)
+- [x] Change "العملاء" to "الشركات"
+- [x] Complete Providers analysis integration
+- [x] Test and save checkpoint

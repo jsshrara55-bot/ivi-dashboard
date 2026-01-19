@@ -118,9 +118,9 @@ export default function PDFReport() {
     },
     { 
       key: 'clientDetails', 
-      label: language === 'ar' ? 'تفاصيل العملاء' : 'Client Details',
+      label: language === 'ar' ? 'تفاصيل الشركات' : 'Client Details',
       icon: FileDown,
-      description: language === 'ar' ? 'قائمة تفصيلية بجميع العملاء ونقاطهم' : 'Detailed list of all clients and their scores'
+      description: language === 'ar' ? 'قائمة تفصيلية بجميع الشركات ونقاطها' : 'Detailed list of all clients and their scores'
     },
   ];
 
@@ -173,7 +173,7 @@ export default function PDFReport() {
         <div class="section">
           <h2>${isArabic ? 'الملخص التنفيذي' : 'Executive Summary'}</h2>
           <p>${isArabic 
-            ? `يقدم هذا التقرير تحليلاً شاملاً لمحفظة العملاء باستخدام مؤشر القيمة الذكي (IVI). تضم المحفظة ${stats.total} شركة بمتوسط نقاط IVI يبلغ ${stats.avgIVI}.`
+            ? `يقدم هذا التقرير تحليلاً شاملاً لمحفظة الشركات باستخدام مؤشر القيمة الذكي (IVI). تضم المحفظة ${stats.total} شركة بمتوسط نقاط IVI يبلغ ${stats.avgIVI}.`
             : `This report provides a comprehensive analysis of the client portfolio using the Intelligent Value Index (IVI). The portfolio consists of ${stats.total} companies with an average IVI score of ${stats.avgIVI}.`
           }</p>
           <div class="highlight-box">
@@ -403,7 +403,7 @@ export default function PDFReport() {
               <tr>
                 <th>${isArabic ? 'الشركة' : 'Company'}</th>
                 <th>${isArabic ? 'المنطقة' : 'Region'}</th>
-                <th>${isArabic ? 'القطاع' : 'Sector'}</th>
+                <th>${isArabic ? 'أخرى' : 'Others'}</th>
                 <th>IVI</th>
                 <th>${isArabic ? 'المخاطر' : 'Risk'}</th>
               </tr>
@@ -535,7 +535,7 @@ export default function PDFReport() {
       <body>
         <div class="header">
           <h1>${isArabic ? 'تقرير مؤشر القيمة الذكي (IVI)' : 'Intelligent Value Index (IVI) Report'}</h1>
-          <p class="subtitle">${isArabic ? 'تقرير تفصيلي شامل لتحليل محفظة العملاء' : 'Comprehensive detailed report for client portfolio analysis'}</p>
+          <p class="subtitle">${isArabic ? 'تقرير تفصيلي شامل لتحليل محفظة الشركات' : 'Comprehensive detailed report for client portfolio analysis'}</p>
           <p>${isArabic ? 'تم الإنشاء في:' : 'Generated on:'} ${new Date().toLocaleDateString(isArabic ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
           <p>${isArabic ? `الأقسام المضمنة: ${selectedCount}` : `Sections included: ${selectedCount}`}</p>
         </div>

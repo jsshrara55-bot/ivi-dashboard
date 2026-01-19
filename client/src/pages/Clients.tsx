@@ -154,7 +154,7 @@ export default function Clients() {
       'اسم الشركة': client.companyName || '-',
       'الكود': client.contNo,
       'المنطقة': client.region || '-',
-      'القطاع': client.sector || '-',
+      'أخرى': client.sector || '-',
       'IVI Score': client.iviScore ? parseFloat(client.iviScore).toFixed(1) : '-',
       'H Score': client.hScore ? parseFloat(client.hScore).toFixed(1) : '-',
       'E Score': client.eScore ? parseFloat(client.eScore).toFixed(1) : '-',
@@ -171,11 +171,11 @@ export default function Clients() {
     
     // Main data sheet
     const ws = XLSX.utils.json_to_sheet(exportData);
-    XLSX.utils.book_append_sheet(wb, ws, 'العملاء');
+    XLSX.utils.book_append_sheet(wb, ws, 'الشركات');
 
     // Summary sheet
     const summaryData = [
-      { 'المقياس': 'إجمالي العملاء', 'القيمة': filteredClients.length },
+      { 'المقياس': 'إجمالي الشركات', 'القيمة': filteredClients.length },
       { 'المقياس': 'متوسط IVI', 'القيمة': (filteredClients.reduce((sum, c) => sum + parseFloat(c.iviScore || '0'), 0) / (filteredClients.length || 1)).toFixed(1) },
       { 'المقياس': 'عملاء عالية المخاطر', 'القيمة': filteredClients.filter(c => c.riskCategory === 'High').length },
       { 'المقياس': 'عملاء متوسطة المخاطر', 'القيمة': filteredClients.filter(c => c.riskCategory === 'Medium').length },
@@ -188,7 +188,7 @@ export default function Clients() {
       summaryData.push({ 'المقياس': 'فلتر المنطقة', 'القيمة': regionFilter });
     }
     if (sectorFilter !== 'all') {
-      summaryData.push({ 'المقياس': 'فلتر القطاع', 'القيمة': sectorFilter });
+      summaryData.push({ 'المقياس': 'فلتر الفئة', 'القيمة': sectorFilter });
     }
     if (riskFilter !== 'all') {
       summaryData.push({ 'المقياس': 'فلتر المخاطر', 'القيمة': riskFilter === 'High' ? 'عالية' : riskFilter === 'Medium' ? 'متوسطة' : 'منخفضة' });
@@ -218,7 +218,7 @@ export default function Clients() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">العملاء</h1>
+          <h1 className="text-3xl font-bold tracking-tight">الشركات</h1>
           <p className="text-muted-foreground">
             إدارة وعرض جميع الشركات العميلة مع تقييمات IVI
           </p>
@@ -228,7 +228,7 @@ export default function Clients() {
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">إجمالي العملاء</CardTitle>
+              <CardTitle className="text-sm font-medium">إجمالي الشركات</CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -298,10 +298,10 @@ export default function Clients() {
               </Select>
               <Select value={sectorFilter} onValueChange={setSectorFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="القطاع" />
+                  <SelectValue placeholder="أخرى" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع القطاعات</SelectItem>
+                  <SelectItem value="all">جميع الفئات</SelectItem>
                   {sectors.map((sector) => (
                     <SelectItem key={sector} value={sector}>
                       {sector}
@@ -339,7 +339,7 @@ export default function Clients() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>قائمة العملاء ({filteredClients.length})</span>
+              <span>قائمة الشركات ({filteredClients.length})</span>
               <Button variant="outline" onClick={exportToExcel} className="gap-2">
                 <FileSpreadsheet className="h-4 w-4" />
                 تصدير Excel
@@ -368,7 +368,7 @@ export default function Clients() {
                     </TableHead>
                     <TableHead>الكود</TableHead>
                     <TableHead>المنطقة</TableHead>
-                    <TableHead>القطاع</TableHead>
+                    <TableHead>أخرى</TableHead>
                     <TableHead>
                       <Button
                         variant="ghost"

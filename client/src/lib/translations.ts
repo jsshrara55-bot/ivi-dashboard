@@ -6,7 +6,7 @@ export const translations = {
   // Common
   common: {
     dashboard: { ar: 'لوحة التحكم', en: 'Dashboard' },
-    clients: { ar: 'العملاء', en: 'Clients' },
+    clients: { ar: 'الشركات', en: 'Clients' },
     analytics: { ar: 'التحليلات', en: 'Analytics' },
     predictions: { ar: 'التنبؤات', en: 'Predictions' },
     settings: { ar: 'الإعدادات', en: 'Settings' },
@@ -29,9 +29,9 @@ export const translations = {
     filters: { ar: 'الفلاتر', en: 'Filters' },
     clearFilters: { ar: 'مسح الفلاتر', en: 'Clear Filters' },
     region: { ar: 'المنطقة', en: 'Region' },
-    sector: { ar: 'القطاع', en: 'Sector' },
+    sector: { ar: 'أخرى', en: 'Others' },
     allRegions: { ar: 'جميع المناطق', en: 'All Regions' },
-    allSectors: { ar: 'جميع القطاعات', en: 'All Sectors' },
+    allSectors: { ar: 'جميع الفئات', en: 'All Categories' },
     riskCategory: { ar: 'فئة المخاطر', en: 'Risk Category' },
     allRiskLevels: { ar: 'جميع مستويات المخاطر', en: 'All Risk Levels' },
     low: { ar: 'منخفض', en: 'Low' },
