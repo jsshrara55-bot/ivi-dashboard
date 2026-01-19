@@ -2,7 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, Building, TrendingUp, TrendingDown, Activity, Users, DollarSign, Target, AlertTriangle, CheckCircle, ArrowUpRight, ArrowDownRight, BarChart3, PieChart, Hospital, Stethoscope, Pill, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Building2, Building, TrendingUp, TrendingDown, Activity, Users, DollarSign, Target, AlertTriangle, CheckCircle, ArrowUpRight, ArrowDownRight, BarChart3, PieChart, Hospital, Stethoscope, Pill, ThumbsUp, ThumbsDown, Lightbulb, Scale, Heart, Bell, Award, Sliders, Layers, Sparkles, TreePine, Coffee, Leaf } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart as RechartsPieChart, Pie, Cell } from "recharts";
 
@@ -284,12 +284,13 @@ export default function CategoryAnalysis() {
 
         {/* Charts Section */}
         <Tabs defaultValue="comparison" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="comparison">{isRTL ? "المقارنة" : "Comparison"}</TabsTrigger>
             <TabsTrigger value="forecast">{isRTL ? "التوقعات" : "Forecast"}</TabsTrigger>
             <TabsTrigger value="radar">{isRTL ? "الرادار" : "Radar"}</TabsTrigger>
             <TabsTrigger value="insights">{isRTL ? "الرؤى" : "Insights"}</TabsTrigger>
             <TabsTrigger value="providers">{isRTL ? "مقدمو الخدمات" : "Providers"}</TabsTrigger>
+            <TabsTrigger value="philosophy">{isRTL ? "الفلسفة والابتكار" : "Philosophy"}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="comparison">
@@ -647,6 +648,217 @@ export default function CategoryAnalysis() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="philosophy">
+            {/* Nordic Philosophy Section */}
+            <Card className="mb-4 border-indigo-200 bg-gradient-to-br from-indigo-50 to-white">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-indigo-700">
+                  <Sparkles className="h-6 w-6" />
+                  {isRTL ? "الفلسفة الاسكندنافية في IVI" : "Nordic Philosophy in IVI"}
+                </CardTitle>
+                <CardDescription>
+                  {isRTL 
+                    ? "رؤيتنا لمؤشر IVI تتجاوز كونه معادلة رياضية؛ لقد استلهمنا من النموذج النوردي مفهوم 'الثقة المبنية على البيانات'"
+                    : "Our vision for IVI goes beyond being a mathematical formula; we drew inspiration from the Nordic model's concept of 'data-driven trust'"
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
+                  {/* Lagom */}
+                  <Card className="border-blue-200 bg-blue-50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-blue-700 text-lg">
+                        <Scale className="h-5 w-5" />
+                        Lagom
+                      </CardTitle>
+                      <CardDescription className="text-blue-600">
+                        {isRTL ? "القدر الكافي والمناسب" : "Just the Right Amount"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {isRTL 
+                          ? "في كفاءة الاستخدام (U)، لا نكافئ الشركة التي لا يستهلك موظفوها التأمين (لأن هذا قد يعني إهمالاً صحياً)، بل نكافئ الشركة التي تستهلكه 'بذكاء'."
+                          : "In Utilization (U), we don't reward companies whose employees don't use insurance (as this may indicate health neglect), but reward those who use it 'smartly'."
+                        }
+                      </p>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Badge className="bg-blue-100 text-blue-800">{isRTL ? "فحوصات وقائية ↑" : "Preventive Checkups ↑"}</Badge>
+                        <Badge className="bg-blue-100 text-blue-800">{isRTL ? "عمليات جراحية ↓" : "Surgeries ↓"}</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Hygge */}
+                  <Card className="border-amber-200 bg-amber-50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-amber-700 text-lg">
+                        <Coffee className="h-5 w-5" />
+                        Hygge
+                      </CardTitle>
+                      <CardDescription className="text-amber-600">
+                        {isRTL ? "الراحة النفسية والأمان" : "Comfort & Security"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {isRTL 
+                          ? "في تجربة العميل (E)، نضيف 'مؤشر الجهد' (Effort Score). كلما قل عدد الخطوات للحصول على الموافقة، زادت درجة IVI."
+                          : "In Experience (E), we add an 'Effort Score'. The fewer steps to get approval, the higher the IVI score."
+                        }
+                      </p>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Badge className="bg-amber-100 text-amber-800">{isRTL ? "تجربة خالية من التوتر" : "Stress-Free Experience"}</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Friluftsliv */}
+                  <Card className="border-green-200 bg-green-50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-green-700 text-lg">
+                        <TreePine className="h-5 w-5" />
+                        Friluftsliv
+                      </CardTitle>
+                      <CardDescription className="text-green-600">
+                        {isRTL ? "الارتباط بالطبيعة والوقاية" : "Nature & Prevention"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {isRTL 
+                          ? "في المخرجات الصحية (H)، نقدم توصيات تعتمد على 'الرعاية الاستباقية'، مثل تحفيز سياسات العمل المرن والمشي."
+                          : "In Health (H), we provide recommendations based on 'proactive care', like encouraging flexible work policies and walking."
+                        }
+                      </p>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Badge className="bg-green-100 text-green-800">{isRTL ? "انخفاض الحالات المزمنة" : "Reduced Chronic Cases"}</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Innovative Ideas Section */}
+            <Card className="mb-4 border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-purple-700">
+                  <Lightbulb className="h-6 w-6" />
+                  {isRTL ? "أفكار مبتكرة لإبهار اللجنة" : "Innovative Ideas"}
+                </CardTitle>
+                <CardDescription>
+                  {isRTL 
+                    ? "أفكار تقنية وإدارية ترفع من قيمة المشروع"
+                    : "Technical and managerial ideas that elevate the project's value"
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {/* Predictive Nudge */}
+                  <Card className="border-red-200">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-red-700 text-lg">
+                        <Bell className="h-5 w-5" />
+                        {isRTL ? "نظام الإنذار المبكر" : "Predictive Nudge"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {isRTL 
+                          ? "البرمجية ترسل تنبيهاً آلياً لقسم المبيعات عندما يتنبأ النموذج بأن شركة معينة في طريقها للتحول من 'مخاطر منخفضة' إلى 'مخاطر عالية' خلال 6 أشهر."
+                          : "The system sends automatic alerts to sales when the model predicts a company is heading from 'low risk' to 'high risk' within 6 months."
+                        }
+                      </p>
+                      <Badge className="bg-red-100 text-red-800">{isRTL ? "مفعل في النظام" : "Active in System"}</Badge>
+                    </CardContent>
+                  </Card>
+
+                  {/* Health Sustainability Index */}
+                  <Card className="border-emerald-200">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-emerald-700 text-lg">
+                        <Award className="h-5 w-5" />
+                        {isRTL ? "مؤشر الاستدامة الصحية" : "Health Sustainability Index"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {isRTL 
+                          ? "الشركة التي تحافظ على درجة IVI مرتفعة لمدة 3 سنوات تحصل على 'شهادة استدامة صحية' من بوبا، مما يحسن سمعتها أمام المستثمرين."
+                          : "Companies maintaining high IVI for 3 years receive a 'Health Sustainability Certificate' from Bupa, improving their reputation with investors."
+                        }
+                      </p>
+                      <Badge className="bg-emerald-100 text-emerald-800">{isRTL ? "مرتبط بـ ESG" : "ESG Linked"}</Badge>
+                    </CardContent>
+                  </Card>
+
+                  {/* What-If Simulator */}
+                  <Card className="border-violet-200">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-violet-700 text-lg">
+                        <Sliders className="h-5 w-5" />
+                        {isRTL ? "محاكي 'ماذا لو؟'" : "What-If Simulator"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {isRTL 
+                          ? "أداة تفاعلية تمكن مدير الموارد البشرية من تجربة سيناريوهات: 'إذا انخفضت السكريات بنسبة 10%، كيف ستتحسن درجة IVI؟'"
+                          : "Interactive tool enabling HR managers to test scenarios: 'If diabetes drops 10%, how will my IVI score improve?'"
+                        }
+                      </p>
+                      <Badge className="bg-violet-100 text-violet-800">{isRTL ? "متاح في السيناريوهات" : "Available in Scenarios"}</Badge>
+                    </CardContent>
+                  </Card>
+
+                  {/* Fair Segmentation */}
+                  <Card className="border-orange-200">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-orange-700 text-lg">
+                        <Layers className="h-5 w-5" />
+                        {isRTL ? "خوارزمية التجزئة العادلة" : "Fair Segmentation"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {isRTL 
+                          ? "تصنيف الشركات بناءً على 'قابليتها للتحسن' وليس فقط حجم المطالبات."
+                          : "Classifying companies based on their 'improvement potential', not just claims volume."
+                        }
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge className="bg-green-100 text-green-800">{isRTL ? "المستقرون" : "The Steady"}</Badge>
+                        <Badge className="bg-yellow-100 text-yellow-800">{isRTL ? "القابلون للتطوير" : "The Improvers"}</Badge>
+                        <Badge className="bg-red-100 text-red-800">{isRTL ? "تحت المجهر" : "The Critical"}</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Executive Summary Quote */}
+            <Card className="border-indigo-300 bg-gradient-to-r from-indigo-100 to-purple-100">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <Leaf className="h-10 w-10 text-indigo-600 mx-auto mb-4" />
+                  <blockquote className="text-lg font-medium text-indigo-800 italic max-w-3xl mx-auto">
+                    {isRTL 
+                      ? '"رؤيتنا لمؤشر IVI تتجاوز كونه معادلة رياضية؛ لقد استلهمنا من النموذج النوردي مفهوم \'\u0627\u0644\u062b\u0642\u0629 \u0627\u0644\u0645\u0628\u0646\u064a\u0629 \u0639\u0644\u0649 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a\'. هدفنا ليس فقط التنبؤ بمن سيغادر بوبا، بل بناء نظام يجعل العميل \'\u064a\u0631\u063a\u0628\' في البقاء لأن بوبا أصبحت شريكاً في نمو صحة موظفيه وليست مجرد شركة دفع فواتير."'
+                      : '"Our vision for IVI goes beyond being a mathematical formula; we drew inspiration from the Nordic model\'s concept of \'data-driven trust\'. Our goal is not just to predict who will leave Bupa, but to build a system that makes clients \'want\' to stay because Bupa has become a partner in their employees\' health growth, not just a bill-paying company."'
+                    }
+                  </blockquote>
+                  <p className="text-sm text-indigo-600 mt-4">
+                    {isRTL ? "— الملخص التنفيذي للعرض" : "— Executive Summary for Presentation"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
