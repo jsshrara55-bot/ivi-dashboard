@@ -1,6 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { Activity, BarChart3, Database, GitCompare, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users, Upload, Bell, Menu, ClipboardCheck, FileText } from "lucide-react";
+import { Activity, BarChart3, Database, GitCompare, Layers, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users, Upload, Bell, Menu, ClipboardCheck, FileText } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 import { Button } from "./ui/button";
@@ -37,6 +37,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: t('common.evaluation'), href: '/evaluation', icon: ClipboardCheck },
     { name: t('common.pdf') + ' ' + (isRTL ? 'تقرير' : 'Report'), href: '/pdf-report', icon: FileText },
     { name: isRTL ? 'مقارنة الشركات' : 'Compare', href: '/compare', icon: GitCompare },
+    { name: isRTL ? 'السيناريوهات' : 'Scenarios', href: '/scenarios', icon: Layers },
   ];
 
   // Admin-only navigation items

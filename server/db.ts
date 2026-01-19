@@ -20,7 +20,9 @@ import {
   notificationLog,
   InsertNotificationLog,
   userSettings,
-  InsertUserSettings
+  InsertUserSettings,
+  iviScenarios,
+  InsertIviScenario
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -989,4 +991,171 @@ export async function deleteUserSettings(userId: number) {
   if (!db) throw new Error("Database not available");
   
   await db.delete(userSettings).where(eq(userSettings.userId, userId));
+}
+
+
+// ==================== IVI Scenarios ====================
+
+export async function createScenario(scenario: InsertIviScenario) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(iviScenarios).values(scenario);
+  return result[0].insertId;
+}
+
+export async function getScenarioById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const scenarios = await db.select().from(iviScenarios).where(eq(iviScenarios.id, id)).limit(1);
+  return scenarios[0] || null;
+}
+
+export async function getScenariosByUserId(userId: number, limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select()
+    .from(iviScenarios)
+    .where(eq(iviScenarios.userId, userId))
+    .orderBy(desc(iviScenarios.createdAt))
+    .limit(limit);
+}
+
+export async function getAllScenarios(limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select()
+    .from(iviScenarios)
+    .orderBy(desc(iviScenarios.createdAt))
+    .limit(limit);
+}
+
+export async function getSharedScenarios(limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select()
+    .from(iviScenarios)
+    .where(eq(iviScenarios.isShared, true))
+    .orderBy(desc(iviScenarios.createdAt))
+    .limit(limit);
+}
+
+export async function getFavoriteScenarios(userId: number, limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select()
+    .from(iviScenarios)
+    .where(and(eq(iviScenarios.userId, userId), eq(iviScenarios.isFavorite, true)))
+    .orderBy(desc(iviScenarios.createdAt))
+    .limit(limit);
+}
+
+export async function updateScenario(id: number, updates: Partial<InsertIviScenario>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(iviScenarios)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(iviScenarios.id, id));
+}
+
+export async function deleteScenario(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(iviScenarios).where(eq(iviScenarios.id, id));
+}
+
+export async function toggleScenarioFavorite(id: number, isFavorite: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(iviScenarios)
+    .set({ isFavorite, updatedAt: new Date() })
+    .where(eq(iviScenarios.id, id));
+}
+
+export async function toggleScenarioShared(id: number, isShared: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(iviScenarios)
+    .set({ isShared, updatedAt: new Date() })
+    .where(eq(iviScenarios.id, id));
+}
+
+// Calculate projected IVI score based on adjustments
+export function calculateProjectedIvi(
+  baseH: number,
+  baseE: number,
+  baseU: number,
+  hAdjustment: number,
+  eAdjustment: number,
+  uAdjustment: number
+): {
+  projectedH: number;
+  projectedE: number;
+  projectedU: number;
+  projectedIvi: number;
+  riskCategory: "Low" | "Medium" | "High";
+} {
+  // Apply adjustments (clamped to 0-100)
+  const projectedH = Math.max(0, Math.min(100, baseH * (1 + hAdjustment / 100)));
+  const projectedE = Math.max(0, Math.min(100, baseE * (1 + eAdjustment / 100)));
+  const projectedU = Math.max(0, Math.min(100, baseU * (1 + uAdjustment / 100)));
+  
+  // Calculate IVI using weighted formula: IVI = 0.4*H + 0.3*E + 0.3*U
+  const projectedIvi = 0.4 * projectedH + 0.3 * projectedE + 0.3 * projectedU;
+  
+  // Determine risk category
+  let riskCategory: "Low" | "Medium" | "High";
+  if (projectedIvi >= 70) {
+    riskCategory = "Low";
+  } else if (projectedIvi >= 35) {
+    riskCategory = "Medium";
+  } else {
+    riskCategory = "High";
+  }
+  
+  return {
+    projectedH: Math.round(projectedH * 100) / 100,
+    projectedE: Math.round(projectedE * 100) / 100,
+    projectedU: Math.round(projectedU * 100) / 100,
+    projectedIvi: Math.round(projectedIvi * 100) / 100,
+    riskCategory,
+  };
+}
+
+// Generate monthly projections for a scenario
+export function generateMonthlyProjections(
+  baseIvi: number,
+  targetIvi: number,
+  months: number
+): { month: number; ivi: number; date: string }[] {
+  const projections: { month: number; ivi: number; date: string }[] = [];
+  const monthlyChange = (targetIvi - baseIvi) / months;
+  
+  const now = new Date();
+  
+  for (let i = 0; i <= months; i++) {
+    const date = new Date(now);
+    date.setMonth(date.getMonth() + i);
+    
+    // Add some variance to make it more realistic
+    const variance = (Math.random() - 0.5) * 2; // ±1 point variance
+    const ivi = Math.round((baseIvi + monthlyChange * i + variance) * 100) / 100;
+    
+    projections.push({
+      month: i,
+      ivi: Math.max(0, Math.min(100, ivi)),
+      date: date.toISOString().split('T')[0],
+    });
+  }
+  
+  return projections;
 }

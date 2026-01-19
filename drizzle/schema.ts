@@ -419,3 +419,57 @@ export const userSettings = mysqlTable("user_settings", {
 
 export type UserSettings = typeof userSettings.$inferSelect;
 export type InsertUserSettings = typeof userSettings.$inferInsert;
+
+
+/**
+ * IVI Scenarios - سيناريوهات توقعات IVI
+ * Stores saved prediction scenarios with different input parameters
+ */
+export const iviScenarios = mysqlTable("ivi_scenarios", {
+  id: int("id").autoincrement().primaryKey(),
+  /** User who created the scenario */
+  userId: int("userId").notNull(),
+  /** Scenario name */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** Scenario description */
+  description: text("description"),
+  /** Target company contract number (optional, null means portfolio-wide) */
+  contNo: varchar("contNo", { length: 50 }),
+  /** Company name if specific company */
+  companyName: varchar("companyName", { length: 255 }),
+  /** Base IVI score before adjustments */
+  baseIviScore: decimal("baseIviScore", { precision: 5, scale: 2 }).notNull(),
+  /** Health Score adjustment percentage (-100 to +100) */
+  hScoreAdjustment: decimal("hScoreAdjustment", { precision: 5, scale: 2 }).default("0").notNull(),
+  /** Experience Score adjustment percentage (-100 to +100) */
+  eScoreAdjustment: decimal("eScoreAdjustment", { precision: 5, scale: 2 }).default("0").notNull(),
+  /** Utilization Score adjustment percentage (-100 to +100) */
+  uScoreAdjustment: decimal("uScoreAdjustment", { precision: 5, scale: 2 }).default("0").notNull(),
+  /** Projected H Score after adjustment */
+  projectedHScore: decimal("projectedHScore", { precision: 5, scale: 2 }).notNull(),
+  /** Projected E Score after adjustment */
+  projectedEScore: decimal("projectedEScore", { precision: 5, scale: 2 }).notNull(),
+  /** Projected U Score after adjustment */
+  projectedUScore: decimal("projectedUScore", { precision: 5, scale: 2 }).notNull(),
+  /** Projected IVI Score after adjustments */
+  projectedIviScore: decimal("projectedIviScore", { precision: 5, scale: 2 }).notNull(),
+  /** Projected risk category */
+  projectedRiskCategory: mysqlEnum("projectedRiskCategory", ["Low", "Medium", "High"]).notNull(),
+  /** Time horizon in months (1-36) */
+  timeHorizonMonths: int("timeHorizonMonths").default(12).notNull(),
+  /** Monthly projections as JSON array */
+  monthlyProjections: text("monthlyProjections"),
+  /** Assumptions and notes */
+  assumptions: text("assumptions"),
+  /** Whether scenario is marked as favorite */
+  isFavorite: boolean("isFavorite").default(false).notNull(),
+  /** Whether scenario is shared with team */
+  isShared: boolean("isShared").default(false).notNull(),
+  /** Tags for categorization (JSON array) */
+  tags: text("tags"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type IviScenario = typeof iviScenarios.$inferSelect;
+export type InsertIviScenario = typeof iviScenarios.$inferInsert;

@@ -173,3 +173,14 @@
 - [x] Include all KPIs in comparison view
 - [x] Support Arabic/English translations
 - [x] Test all features and save checkpoint
+
+## Phase 23: IVI Scenario Management
+- [x] Create database table for scenarios (name, description, parameters, results)
+- [x] Create API endpoints for scenarios CRUD
+- [x] Create Scenarios management page
+- [x] Add scenario creation form with H, E, U adjustment sliders
+- [x] Add scenario comparison view with charts
+- [x] Add scenario export functionality
+- [x] Support Arabic/English translations
+- [x] Write vitest tests for scenarios API
+- [x] Test and save checkpoint

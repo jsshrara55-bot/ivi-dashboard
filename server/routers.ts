@@ -64,6 +64,19 @@ import {
   // User Settings
   getUserSettings,
   createOrUpdateUserSettings,
+  // Scenarios
+  createScenario,
+  getScenarioById,
+  getScenariosByUserId,
+  getAllScenarios,
+  getSharedScenarios,
+  getFavoriteScenarios,
+  updateScenario,
+  deleteScenario,
+  toggleScenarioFavorite,
+  toggleScenarioShared,
+  calculateProjectedIvi,
+  generateMonthlyProjections,
 } from "./db";
 import {
   startScheduler,
@@ -802,6 +815,182 @@ export const appRouter = router({
       });
       return { success: true };
     }),
+  }),
+
+  // ==================== IVI Scenarios ====================
+  scenarios: router({
+    // Get all scenarios for current user
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().optional() }).optional())
+      .query(async ({ ctx, input }) => {
+        return getScenariosByUserId(ctx.user.id, input?.limit || 50);
+      }),
+
+    // Get all shared scenarios
+    listShared: protectedProcedure
+      .input(z.object({ limit: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        return getSharedScenarios(input?.limit || 50);
+      }),
+
+    // Get favorite scenarios
+    listFavorites: protectedProcedure
+      .input(z.object({ limit: z.number().optional() }).optional())
+      .query(async ({ ctx, input }) => {
+        return getFavoriteScenarios(ctx.user.id, input?.limit || 20);
+      }),
+
+    // Get scenario by ID
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return getScenarioById(input.id);
+      }),
+
+    // Calculate projected IVI (preview without saving)
+    calculate: protectedProcedure
+      .input(z.object({
+        baseH: z.number().min(0).max(100),
+        baseE: z.number().min(0).max(100),
+        baseU: z.number().min(0).max(100),
+        hAdjustment: z.number().min(-100).max(100),
+        eAdjustment: z.number().min(-100).max(100),
+        uAdjustment: z.number().min(-100).max(100),
+      }))
+      .mutation(async ({ input }) => {
+        return calculateProjectedIvi(
+          input.baseH,
+          input.baseE,
+          input.baseU,
+          input.hAdjustment,
+          input.eAdjustment,
+          input.uAdjustment
+        );
+      }),
+
+    // Create new scenario
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(255),
+        description: z.string().optional(),
+        contNo: z.string().optional(),
+        companyName: z.string().optional(),
+        baseIviScore: z.string(),
+        hScoreAdjustment: z.string(),
+        eScoreAdjustment: z.string(),
+        uScoreAdjustment: z.string(),
+        projectedHScore: z.string(),
+        projectedEScore: z.string(),
+        projectedUScore: z.string(),
+        projectedIviScore: z.string(),
+        projectedRiskCategory: z.enum(["Low", "Medium", "High"]),
+        timeHorizonMonths: z.number().min(1).max(36).optional(),
+        monthlyProjections: z.string().optional(),
+        assumptions: z.string().optional(),
+        tags: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const id = await createScenario({
+          userId: ctx.user.id,
+          name: input.name,
+          description: input.description,
+          contNo: input.contNo,
+          companyName: input.companyName,
+          baseIviScore: input.baseIviScore,
+          hScoreAdjustment: input.hScoreAdjustment,
+          eScoreAdjustment: input.eScoreAdjustment,
+          uScoreAdjustment: input.uScoreAdjustment,
+          projectedHScore: input.projectedHScore,
+          projectedEScore: input.projectedEScore,
+          projectedUScore: input.projectedUScore,
+          projectedIviScore: input.projectedIviScore,
+          projectedRiskCategory: input.projectedRiskCategory,
+          timeHorizonMonths: input.timeHorizonMonths || 12,
+          monthlyProjections: input.monthlyProjections,
+          assumptions: input.assumptions,
+          tags: input.tags,
+          isFavorite: false,
+          isShared: false,
+        });
+        return { id };
+      }),
+
+    // Update scenario
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).max(255).optional(),
+        description: z.string().optional(),
+        assumptions: z.string().optional(),
+        tags: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const scenario = await getScenarioById(input.id);
+        if (!scenario) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Scenario not found' });
+        }
+        if (scenario.userId !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Not authorized to update this scenario' });
+        }
+        await updateScenario(input.id, input);
+        return { success: true };
+      }),
+
+    // Delete scenario
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const scenario = await getScenarioById(input.id);
+        if (!scenario) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Scenario not found' });
+        }
+        if (scenario.userId !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Not authorized to delete this scenario' });
+        }
+        await deleteScenario(input.id);
+        return { success: true };
+      }),
+
+    // Toggle favorite
+    toggleFavorite: protectedProcedure
+      .input(z.object({ id: z.number(), isFavorite: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        const scenario = await getScenarioById(input.id);
+        if (!scenario) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Scenario not found' });
+        }
+        if (scenario.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Not authorized' });
+        }
+        await toggleScenarioFavorite(input.id, input.isFavorite);
+        return { success: true };
+      }),
+
+    // Toggle shared
+    toggleShared: protectedProcedure
+      .input(z.object({ id: z.number(), isShared: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        const scenario = await getScenarioById(input.id);
+        if (!scenario) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Scenario not found' });
+        }
+        if (scenario.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Not authorized' });
+        }
+        await toggleScenarioShared(input.id, input.isShared);
+        return { success: true };
+      }),
+
+    // Generate monthly projections
+    generateProjections: protectedProcedure
+      .input(z.object({
+        baseIvi: z.number(),
+        targetIvi: z.number(),
+        months: z.number().min(1).max(36),
+      }))
+      .mutation(async ({ input }) => {
+        return generateMonthlyProjections(input.baseIvi, input.targetIvi, input.months);
+      }),
   }),
 });
 

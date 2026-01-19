@@ -19,6 +19,7 @@ import Settings from "./pages/Settings";
 import ProjectEvaluation from "./pages/ProjectEvaluation";
 import PDFReport from "./pages/PDFReport";
 import CompanyComparison from "./pages/CompanyComparison";
+import Scenarios from "./pages/Scenarios";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -38,6 +39,7 @@ function Router() {
       <Route path={"/evaluation"} component={ProjectEvaluation} />
       <Route path={"/pdf-report"} component={PDFReport} />
       <Route path={"/compare"} component={CompanyComparison} />
+      <Route path={"/scenarios"} component={Scenarios} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
