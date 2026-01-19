@@ -24,6 +24,7 @@ import ROICalculator from "./pages/ROICalculator";
 import SMEClients from "./pages/SMEClients";
 import KeyAccounts from "./pages/KeyAccounts";
 import Providers from "./pages/Providers";
+import CategoryAnalysis from "./pages/CategoryAnalysis";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -48,6 +49,7 @@ function Router() {
       <Route path={"/sme-clients"} component={SMEClients} />
       <Route path={"/key-accounts"} component={KeyAccounts} />
       <Route path={"/providers"} component={Providers} />
+      <Route path={"/category-analysis"} component={CategoryAnalysis} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

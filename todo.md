@@ -220,3 +220,13 @@
 - [x] Add navigation links for all classification pages
 - [x] Support Arabic/English translations
 - [x] Test and save checkpoint
+
+## Phase 27: Category-Based IVI Analysis
+- [x] Create Category Analysis page comparing SME vs Key Account
+- [x] Add IVI comparison metrics between categories
+- [x] Add forecast comparison charts (Bar, Line, Radar)
+- [x] Add strengths/weaknesses analysis for each category
+- [x] Add strategic recommendations for each category
+- [x] Support Arabic/English translations
+- [x] Add route and sidebar link
+- [x] Test and save checkpoint
