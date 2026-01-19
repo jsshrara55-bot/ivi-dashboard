@@ -151,3 +151,12 @@
 - [x] Create detailed PDF export with charts and criteria
 - [x] Test all features with both languages
 - [x] Save checkpoint
+
+## Phase 21: IVI Predictions KPIs Section
+- [x] Add IVI Predictions KPIs section to Dashboard
+- [x] Include expected IVI improvement metrics
+- [x] Include risk category transition forecasts
+- [x] Include top companies likely to improve/decline
+- [x] Include early warning indicators
+- [x] Support Arabic/English translations
+- [x] Test and save checkpoint

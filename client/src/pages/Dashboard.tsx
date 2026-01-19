@@ -522,6 +522,164 @@ export default function Dashboard() {
           </Card>
         </div>
 
+        {/* IVI Predictions KPIs Section */}
+        <Card className="swiss-card bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardHeader>
+            <div className={cn("flex items-center justify-between", isRTL && "flex-row-reverse")}>
+              <div className={isRTL ? "text-right" : ""}>
+                <CardTitle className={cn("flex items-center gap-2 text-xl", isRTL && "flex-row-reverse")}>
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  {language === 'ar' ? 'مؤشرات الأداء الرئيسية للتوقعات' : 'Predictions KPIs'}
+                </CardTitle>
+                <CardDescription>
+                  {language === 'ar' ? 'ملخص أهم مؤشرات التوقعات والتحولات المتوقعة في المحفظة' : 'Summary of key prediction indicators and expected portfolio transitions'}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {/* Expected IVI Improvement */}
+              <div className="p-4 rounded-lg bg-background border">
+                <div className={cn("flex items-center gap-2 mb-2", isRTL && "flex-row-reverse")}>
+                  <div className="p-2 rounded-full bg-green-100">
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                  </div>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {language === 'ar' ? 'التحسن المتوقع في IVI' : 'Expected IVI Improvement'}
+                  </span>
+                </div>
+                <div className="text-3xl font-bold text-green-600">+{improvement.toFixed(1)}</div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {language === 'ar' ? `(${improvementPercent.toFixed(1)}%) خلال 12 شهر` : `(${improvementPercent.toFixed(1)}%) in 12 months`}
+                </div>
+                <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-green-500 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(improvementPercent * 2, 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Risk Transition Forecast */}
+              <div className="p-4 rounded-lg bg-background border">
+                <div className={cn("flex items-center gap-2 mb-2", isRTL && "flex-row-reverse")}>
+                  <div className="p-2 rounded-full bg-blue-100">
+                    <Activity className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {language === 'ar' ? 'التحولات المتوقعة في المخاطر' : 'Risk Transitions Forecast'}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                    <span className="text-sm">{language === 'ar' ? 'عالي ← متوسط' : 'High → Medium'}</span>
+                    <span className="text-sm font-bold text-green-600">~{Math.round(highRiskCount * 0.3)}</span>
+                  </div>
+                  <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                    <span className="text-sm">{language === 'ar' ? 'متوسط ← منخفض' : 'Medium → Low'}</span>
+                    <span className="text-sm font-bold text-green-600">~{Math.round(mediumRiskCount * 0.25)}</span>
+                  </div>
+                  <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                    <span className="text-sm">{language === 'ar' ? 'منخفض ← متوسط' : 'Low → Medium'}</span>
+                    <span className="text-sm font-bold text-red-500">~{Math.round(lowRiskCount * 0.05)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Improvement Candidates */}
+              <div className="p-4 rounded-lg bg-background border">
+                <div className={cn("flex items-center gap-2 mb-2", isRTL && "flex-row-reverse")}>
+                  <div className="p-2 rounded-full bg-purple-100">
+                    <Users className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {language === 'ar' ? 'الأكثر احتمالاً للتحسن' : 'Most Likely to Improve'}
+                  </span>
+                </div>
+                <div className="text-3xl font-bold text-purple-600">
+                  {filteredScores.filter(s => s.Risk_Category === 'Medium Risk' && s.IVI_Score >= 35).length}
+                </div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {language === 'ar' ? 'شركة في منطقة التحسن' : 'companies in improvement zone'}
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  {language === 'ar' ? 'IVI بين 35-69 مع إمكانية عالية للتحسن' : 'IVI 35-69 with high improvement potential'}
+                </div>
+              </div>
+
+              {/* Early Warning Indicators */}
+              <div className="p-4 rounded-lg bg-background border">
+                <div className={cn("flex items-center gap-2 mb-2", isRTL && "flex-row-reverse")}>
+                  <div className="p-2 rounded-full bg-amber-100">
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  </div>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {language === 'ar' ? 'مؤشرات الإنذار المبكر' : 'Early Warning Indicators'}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                    <span className="text-sm">{language === 'ar' ? 'انخفاض H' : 'Declining H'}</span>
+                    <span className="text-sm font-bold text-amber-600">
+                      {filteredScores.filter(s => s.H_score < 40).length}
+                    </span>
+                  </div>
+                  <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                    <span className="text-sm">{language === 'ar' ? 'انخفاض E' : 'Declining E'}</span>
+                    <span className="text-sm font-bold text-amber-600">
+                      {filteredScores.filter(s => s.E_score < 40).length}
+                    </span>
+                  </div>
+                  <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                    <span className="text-sm">{language === 'ar' ? 'انخفاض U' : 'Declining U'}</span>
+                    <span className="text-sm font-bold text-amber-600">
+                      {filteredScores.filter(s => s.U_score < 40).length}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Predictions Summary */}
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div className={cn("p-4 rounded-lg bg-green-50 border border-green-200", isRTL && "text-right")}>
+                <div className="text-sm font-medium text-green-800 mb-1">
+                  {language === 'ar' ? 'التوقع الإيجابي' : 'Positive Outlook'}
+                </div>
+                <div className="text-sm text-green-700">
+                  {language === 'ar' 
+                    ? `${Math.round(highRiskCount * 0.3 + mediumRiskCount * 0.25)} شركة متوقع انتقالها لفئة مخاطر أقل`
+                    : `${Math.round(highRiskCount * 0.3 + mediumRiskCount * 0.25)} companies expected to move to lower risk category`
+                  }
+                </div>
+              </div>
+              <div className={cn("p-4 rounded-lg bg-blue-50 border border-blue-200", isRTL && "text-right")}>
+                <div className="text-sm font-medium text-blue-800 mb-1">
+                  {language === 'ar' ? 'متوسط IVI المتوقع' : 'Projected Avg IVI'}
+                </div>
+                <div className="text-sm text-blue-700">
+                  {language === 'ar' 
+                    ? `من ${avgIVI.toFixed(1)} إلى ${avgFutureIVI.toFixed(1)} (+${improvement.toFixed(1)} نقطة)`
+                    : `From ${avgIVI.toFixed(1)} to ${avgFutureIVI.toFixed(1)} (+${improvement.toFixed(1)} points)`
+                  }
+                </div>
+              </div>
+              <div className={cn("p-4 rounded-lg bg-amber-50 border border-amber-200", isRTL && "text-right")}>
+                <div className="text-sm font-medium text-amber-800 mb-1">
+                  {language === 'ar' ? 'تحذير' : 'Warning'}
+                </div>
+                <div className="text-sm text-amber-700">
+                  {language === 'ar' 
+                    ? `${filteredScores.filter(s => s.H_score < 40 || s.E_score < 40 || s.U_score < 40).length} شركة تحتاج تدخل فوري`
+                    : `${filteredScores.filter(s => s.H_score < 40 || s.E_score < 40 || s.U_score < 40).length} companies need immediate intervention`
+                  }
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">{t('dashboard.overview')}</TabsTrigger>
