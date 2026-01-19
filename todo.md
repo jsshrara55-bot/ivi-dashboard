@@ -271,3 +271,12 @@
 - [x] Support Arabic/English translations
 - [x] Add routes and sidebar links
 - [x] Test and save checkpoint
+
+## Phase 32: IVI Radar Chart & Bridge Diagram
+- [x] Add IVI Radar Chart (Spider Chart) showing H, E, U balance
+- [x] Create Bridge Diagram connecting Traditional Insurance to Longevity Model
+- [x] Add IVI as the bridge in the middle
+- [x] Add Risk Drivers Radar for comprehensive analysis
+- [x] Support Arabic/English translations
+- [x] Test and save checkpoint
+- [x] Export updated ZIP file with documentation

@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { FeatureImportanceChart, IVIForecastChart, IVITrendChart, KPICard, RiskDistributionChart, ScoresComparisonChart, ThresholdAlertIndicator } from "@/components/DashboardComponents";
+import { IVIRadarChart, IVIBridgeDiagram, RiskDriversRadar } from "@/components/IVIRadarAndBridge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -754,17 +755,43 @@ export default function Dashboard() {
               </Card>
             )}
             
-            <Card className="swiss-card">
-              <CardHeader>
-                <CardTitle>{t('dashboard.topRiskDrivers')}</CardTitle>
-                <CardDescription>
-                  {language === 'ar' ? 'العوامل الرئيسية المؤثرة على الاحتفاظ بالشركات ونقاط IVI' : 'Key factors influencing client retention and IVI scores'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <FeatureImportanceChart data={featureImportance} />
-              </CardContent>
-            </Card>
+<Card className="swiss-card">
+                <CardHeader>
+                  <CardTitle>{t('dashboard.topRiskDrivers')}</CardTitle>
+                  <CardDescription>
+                    {language === 'ar' ? 'العوامل الرئيسية المؤثرة على الاحتفاظ بالشركات ونقاط IVI' : 'Key factors influencing client retention and IVI scores'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FeatureImportanceChart data={featureImportance} />
+                </CardContent>
+              </Card>
+
+              {/* IVI Radar Chart - Spider Chart */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <IVIRadarChart 
+                  companies={filteredScores.slice(0, 3).map(s => ({
+                    name: s.Company_Name || s.CONT_NO,
+                    h: s.H_score,
+                    e: s.E_score,
+                    u: s.U_score,
+                    ivi: s.IVI_Score
+                  }))}
+                  showIdeal={true}
+                />
+                <RiskDriversRadar
+                  companies={filteredScores.slice(0, 2).map(s => ({
+                    name: s.Company_Name || s.CONT_NO,
+                    h: s.H_score,
+                    e: s.E_score,
+                    u: s.U_score,
+                    ivi: s.IVI_Score
+                  }))}
+                />
+              </div>
+
+              {/* IVI Bridge Diagram */}
+              <IVIBridgeDiagram />
           </TabsContent>
           
           <TabsContent value="analytics" className="space-y-4">
