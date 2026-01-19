@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FileText, Download, Sparkles, Lightbulb, Scale, Coffee, TreePine, Bell, Award, Sliders, Layers, Leaf, Printer, Eye } from "lucide-react";
+import { FileText, Download, Sparkles, Lightbulb, Scale, Coffee, TreePine, Bell, Award, Sliders, Layers, Leaf, Printer, Eye, Presentation } from "lucide-react";
+import { generateIVIPresentation } from "@/lib/pptxExport";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 
@@ -59,9 +60,20 @@ export default function PresentationReport() {
               <Printer className="h-4 w-4 mr-2" />
               {isRTL ? "طباعة" : "Print"}
             </Button>
-            <Button onClick={handlePrint}>
+            <Button variant="outline" onClick={handlePrint}>
               <Download className="h-4 w-4 mr-2" />
               {isRTL ? "تصدير PDF" : "Export PDF"}
+            </Button>
+            <Button onClick={() => generateIVIPresentation({
+              language: language as 'ar' | 'en',
+              includePhilosophy: selectedSections.nordicPhilosophy,
+              includeInnovation: selectedSections.innovativeIdeas,
+              includeExecutiveSummary: selectedSections.executiveSummary,
+              includeRadarBridge: selectedSections.iviOverview,
+              includeRecommendations: selectedSections.recommendations,
+            })}>
+              <Presentation className="h-4 w-4 mr-2" />
+              {isRTL ? "تصدير PowerPoint" : "Export PPTX"}
             </Button>
           </div>
         </div>
