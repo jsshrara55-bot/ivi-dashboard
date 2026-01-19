@@ -20,6 +20,7 @@ import ProjectEvaluation from "./pages/ProjectEvaluation";
 import PDFReport from "./pages/PDFReport";
 import CompanyComparison from "./pages/CompanyComparison";
 import Scenarios from "./pages/Scenarios";
+import ROICalculator from "./pages/ROICalculator";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -40,6 +41,7 @@ function Router() {
       <Route path={"/pdf-report"} component={PDFReport} />
       <Route path={"/compare"} component={CompanyComparison} />
       <Route path={"/scenarios"} component={Scenarios} />
+      <Route path={"/roi-calculator"} component={ROICalculator} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

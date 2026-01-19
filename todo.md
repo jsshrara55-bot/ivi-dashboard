@@ -195,3 +195,14 @@
 - [x] Update Scenarios page to display recommendations
 - [x] Support Arabic/English translations
 - [x] Test and save checkpoint
+
+## Phase 25: ROI Calculator Page
+- [x] Create ROI Calculator page with input parameters
+- [x] Add cost estimation for implementing recommendations
+- [x] Add savings calculation based on IVI improvement
+- [x] Add ROI calculation formula and display
+- [x] Add interactive charts for ROI visualization
+- [x] Add scenario comparison for ROI
+- [x] Support Arabic/English translations
+- [x] Add route and sidebar link
+- [x] Test and save checkpoint
