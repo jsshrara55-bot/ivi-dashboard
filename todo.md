@@ -184,3 +184,14 @@
 - [x] Support Arabic/English translations
 - [x] Write vitest tests for scenarios API
 - [x] Test and save checkpoint
+
+## Phase 24: Scenario-Linked Recommendations
+- [x] Create recommendation generation logic based on H, E, U adjustments
+- [x] Define action items for Health (H) improvements
+- [x] Define action items for Experience (E) improvements
+- [x] Define action items for Utilization (U) improvements
+- [x] Add priority and timeline estimates for each action
+- [x] Add success metrics/KPIs for each recommendation
+- [x] Update Scenarios page to display recommendations
+- [x] Support Arabic/English translations
+- [x] Test and save checkpoint

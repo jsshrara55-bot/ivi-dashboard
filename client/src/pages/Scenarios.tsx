@@ -32,8 +32,22 @@ import {
   RefreshCw,
   Eye,
   GitCompare,
-  Download
+  Download,
+  Target,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Lightbulb,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
+import { 
+  generateRecommendations, 
+  calculateTotalImpact, 
+  getImplementationRoadmap,
+  ActionItem 
+} from "@/lib/scenarioRecommendations";
 import {
   LineChart,
   Line,
@@ -177,6 +191,30 @@ export default function Scenarios() {
     
     return projections;
   }, [baseScores.ivi, projectedScores.ivi, timeHorizon, isRTL]);
+  
+  // Generate recommendations based on adjustments
+  const recommendations = useMemo(() => {
+    return generateRecommendations(hAdjustment, eAdjustment, uAdjustment);
+  }, [hAdjustment, eAdjustment, uAdjustment]);
+  
+  // Calculate total impact from recommendations
+  const totalImpact = useMemo(() => {
+    return calculateTotalImpact(recommendations);
+  }, [recommendations]);
+  
+  // Get implementation roadmap
+  const roadmap = useMemo(() => {
+    return getImplementationRoadmap(recommendations, isRTL);
+  }, [recommendations, isRTL]);
+  
+  // State for expanded recommendation cards
+  const [expandedRecs, setExpandedRecs] = useState<string[]>([]);
+  
+  const toggleRecExpanded = (id: string) => {
+    setExpandedRecs(prev => 
+      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
+    );
+  };
   
   const resetForm = () => {
     setScenarioName("");
@@ -661,6 +699,189 @@ export default function Scenarios() {
                     </div>
                   </CardContent>
                 </Card>
+                
+                {/* Recommendations Section */}
+                {recommendations.length > 0 && (
+                  <Card className="border-2 border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Lightbulb className="h-5 w-5 text-yellow-500" />
+                        {isRTL ? 'الإجراءات والتوصيات المقترحة' : 'Recommended Actions & Interventions'}
+                      </CardTitle>
+                      <CardDescription>
+                        {isRTL 
+                          ? `${recommendations.length} إجراء مقترح لتحقيق أهداف السيناريو`
+                          : `${recommendations.length} recommended actions to achieve scenario goals`}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Impact Summary */}
+                      <div className="grid grid-cols-4 gap-2 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 rounded-lg">
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground">
+                            {isRTL ? 'تأثير H' : 'H Impact'}
+                          </div>
+                          <div className="font-bold text-red-600">+{totalImpact.hImpact}%</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground">
+                            {isRTL ? 'تأثير E' : 'E Impact'}
+                          </div>
+                          <div className="font-bold text-blue-600">+{totalImpact.eImpact}%</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xs text-muted-foreground">
+                            {isRTL ? 'تأثير U' : 'U Impact'}
+                          </div>
+                          <div className="font-bold text-green-600">+{totalImpact.uImpact}%</div>
+                        </div>
+                        <div className="text-center border-r-2 border-primary/20 pr-2" style={{ borderRight: isRTL ? 'none' : undefined, borderLeft: isRTL ? '2px solid' : 'none' }}>
+                          <div className="text-xs text-muted-foreground">
+                            {isRTL ? 'إجمالي IVI' : 'Total IVI'}
+                          </div>
+                          <div className="font-bold text-primary">+{totalImpact.totalImpact.toFixed(1)}%</div>
+                        </div>
+                      </div>
+                      
+                      {/* Implementation Roadmap */}
+                      <div className="space-y-4">
+                        <h4 className="font-semibold flex items-center gap-2">
+                          <Target className="h-4 w-4" />
+                          {isRTL ? 'خارطة طريق التنفيذ' : 'Implementation Roadmap'}
+                        </h4>
+                        
+                        {roadmap.map((phase, phaseIdx) => (
+                          <div key={phaseIdx} className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                              <Badge variant="outline" className="bg-primary/10">
+                                {phase.phase}
+                              </Badge>
+                              <span className="text-muted-foreground flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {phase.timeline}
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-2 ml-4">
+                              {phase.actions.map((action) => (
+                                <div 
+                                  key={action.id} 
+                                  className="border rounded-lg overflow-hidden"
+                                >
+                                  <div 
+                                    className="p-3 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors"
+                                    onClick={() => toggleRecExpanded(action.id)}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-2 h-2 rounded-full ${
+                                        action.category === 'H' ? 'bg-red-500' :
+                                        action.category === 'E' ? 'bg-blue-500' : 'bg-green-500'
+                                      }`} />
+                                      <span className="font-medium text-sm">
+                                        {isRTL ? action.title.ar : action.title.en}
+                                      </span>
+                                      <Badge variant={action.priority === 'high' ? 'destructive' : action.priority === 'medium' ? 'default' : 'secondary'} className="text-xs">
+                                        {action.priority === 'high' ? (isRTL ? 'عالي' : 'High') :
+                                         action.priority === 'medium' ? (isRTL ? 'متوسط' : 'Medium') :
+                                         (isRTL ? 'منخفض' : 'Low')}
+                                      </Badge>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-green-600 font-medium">
+                                        +{action.estimatedImpact}%
+                                      </span>
+                                      {expandedRecs.includes(action.id) ? 
+                                        <ChevronUp className="h-4 w-4" /> : 
+                                        <ChevronDown className="h-4 w-4" />
+                                      }
+                                    </div>
+                                  </div>
+                                  
+                                  {expandedRecs.includes(action.id) && (
+                                    <div className="p-4 bg-muted/30 border-t space-y-3">
+                                      <p className="text-sm text-muted-foreground">
+                                        {isRTL ? action.description.ar : action.description.en}
+                                      </p>
+                                      
+                                      <div className="flex items-center gap-4 text-xs">
+                                        <span className="flex items-center gap-1">
+                                          <Clock className="h-3 w-3" />
+                                          {isRTL ? action.timeline.ar : action.timeline.en}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                          <TrendingUp className="h-3 w-3 text-green-500" />
+                                          {isRTL ? 'التأثير المتوقع:' : 'Expected Impact:'} +{action.estimatedImpact}%
+                                        </span>
+                                      </div>
+                                      
+                                      <div className="space-y-1">
+                                        <div className="text-xs font-medium">
+                                          {isRTL ? 'مؤشرات الأداء الرئيسية:' : 'Key Performance Indicators:'}
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                          {action.kpis.map((kpi, kpiIdx) => (
+                                            <Badge key={kpiIdx} variant="outline" className="text-xs">
+                                              {isRTL ? kpi.name.ar : kpi.name.en}: {kpi.target}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Category Summary */}
+                      <Separator />
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                          <Heart className="h-5 w-5 text-red-500 mx-auto mb-1" />
+                          <div className="text-xs text-muted-foreground">
+                            {isRTL ? 'إجراءات الصحة' : 'Health Actions'}
+                          </div>
+                          <div className="font-bold">
+                            {recommendations.filter(r => r.category === 'H').length}
+                          </div>
+                        </div>
+                        <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                          <Smile className="h-5 w-5 text-blue-500 mx-auto mb-1" />
+                          <div className="text-xs text-muted-foreground">
+                            {isRTL ? 'إجراءات التجربة' : 'Experience Actions'}
+                          </div>
+                          <div className="font-bold">
+                            {recommendations.filter(r => r.category === 'E').length}
+                          </div>
+                        </div>
+                        <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                          <DollarSign className="h-5 w-5 text-green-500 mx-auto mb-1" />
+                          <div className="text-xs text-muted-foreground">
+                            {isRTL ? 'إجراءات الاستخدام' : 'Utilization Actions'}
+                          </div>
+                          <div className="font-bold">
+                            {recommendations.filter(r => r.category === 'U').length}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                {recommendations.length === 0 && (hAdjustment > 0 || eAdjustment > 0 || uAdjustment > 0) && (
+                  <Card className="border-dashed">
+                    <CardContent className="p-6 text-center text-muted-foreground">
+                      <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p>
+                        {isRTL 
+                          ? 'قم بزيادة التعديلات للحصول على توصيات مخصصة'
+                          : 'Increase adjustments to get personalized recommendations'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
                 
                 {/* Save Button */}
                 <Button 
