@@ -257,3 +257,17 @@
 - [x] Add Fair Segmentation algorithm (Steady, Improvers, Critical)
 - [x] Support Arabic/English translations
 - [x] Test and save checkpoint
+
+## Phase 31: Presentation Report & Before/After Comparison
+- [x] Create Presentation Report page for committee PDF export
+- [x] Include Nordic Philosophy section in report
+- [x] Include Innovative Ideas section in report
+- [x] Include Executive Summary quote in report
+- [x] Add customizable report sections
+- [x] Create Before/After Comparison page
+- [x] Show IVI metrics before applying Nordic philosophy
+- [x] Show projected IVI metrics after applying recommendations
+- [x] Add visual comparison charts
+- [x] Support Arabic/English translations
+- [x] Add routes and sidebar links
+- [x] Test and save checkpoint

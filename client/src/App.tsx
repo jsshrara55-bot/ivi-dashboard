@@ -25,6 +25,8 @@ import SMEClients from "./pages/SMEClients";
 import KeyAccounts from "./pages/KeyAccounts";
 import Providers from "./pages/Providers";
 import CategoryAnalysis from "./pages/CategoryAnalysis";
+import PresentationReport from "./pages/PresentationReport";
+import BeforeAfterComparison from "./pages/BeforeAfterComparison";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -50,6 +52,8 @@ function Router() {
       <Route path={"/key-accounts"} component={KeyAccounts} />
       <Route path={"/providers"} component={Providers} />
       <Route path={"/category-analysis"} component={CategoryAnalysis} />
+      <Route path={"/presentation-report"} component={PresentationReport} />
+      <Route path={"/before-after"} component={BeforeAfterComparison} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
