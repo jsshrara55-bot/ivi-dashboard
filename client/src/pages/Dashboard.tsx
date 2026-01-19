@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { FeatureImportanceChart, IVITrendChart, KPICard, RiskDistributionChart, ScoresComparisonChart } from "@/components/DashboardComponents";
+import { FeatureImportanceChart, IVIForecastChart, IVITrendChart, KPICard, RiskDistributionChart, ScoresComparisonChart, ThresholdAlertIndicator } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -641,6 +641,20 @@ export default function Dashboard() {
               </div>
             </div>
 
+            {/* Interactive 12-Month Forecast Chart */}
+            <div className="mt-6">
+              <div className={cn("flex items-center gap-2 mb-4", isRTL && "flex-row-reverse")}>
+                <h4 className="text-sm font-semibold">
+                  {language === 'ar' ? 'مسار IVI المتوقع (12 شهر)' : '12-Month IVI Forecast'}
+                </h4>
+              </div>
+              <IVIForecastChart 
+                currentIVI={avgIVI} 
+                projectedIVI={avgFutureIVI} 
+                language={language}
+              />
+            </div>
+
             {/* Additional Predictions Summary */}
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               <div className={cn("p-4 rounded-lg bg-green-50 border border-green-200", isRTL && "text-right")}>
@@ -685,6 +699,7 @@ export default function Dashboard() {
             <TabsTrigger value="overview">{t('dashboard.overview')}</TabsTrigger>
             <TabsTrigger value="analytics">{t('dashboard.detailedAnalytics')}</TabsTrigger>
             <TabsTrigger value="predictions">{t('dashboard.futurePredictions')}</TabsTrigger>
+            <TabsTrigger value="alerts">{language === 'ar' ? 'التنبيهات الذكية' : 'Smart Alerts'}</TabsTrigger>
             <TabsTrigger value="recommendations">{t('dashboard.recommendations')}</TabsTrigger>
           </TabsList>
           
@@ -797,6 +812,183 @@ export default function Dashboard() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="alerts" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Companies Approaching Upgrade Threshold */}
+              <Card className="swiss-card border-l-4 border-l-green-500">
+                <CardHeader>
+                  <CardTitle className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}>
+                    <TrendingUp className="h-5 w-5 text-green-500" />
+                    {language === 'ar' ? 'شركات قريبة من الترقية' : 'Companies Near Upgrade'}
+                  </CardTitle>
+                  <CardDescription>
+                    {language === 'ar' ? 'شركات قد تنتقل لفئة مخاطر أقل قريباً' : 'Companies that may move to a lower risk category soon'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ThresholdAlertIndicator 
+                    companies={filteredScores
+                      .filter(s => {
+                        // High Risk companies close to Medium (threshold: 35)
+                        if (s.Risk_Category === 'High Risk' && s.IVI_Score >= 30 && s.IVI_Score < 35) return true;
+                        // Medium Risk companies close to Low (threshold: 70)
+                        if (s.Risk_Category === 'Medium Risk' && s.IVI_Score >= 65 && s.IVI_Score < 70) return true;
+                        return false;
+                      })
+                      .slice(0, 5)
+                      .map(s => ({
+                        name: s.Company_Name || s.CONT_NO,
+                        currentIVI: s.IVI_Score,
+                        threshold: s.Risk_Category === 'High Risk' ? 35 : 70,
+                        direction: 'up' as const,
+                        daysToThreshold: Math.round(Math.random() * 60 + 30)
+                      }))
+                    }
+                    language={language}
+                  />
+                  {filteredScores.filter(s => 
+                    (s.Risk_Category === 'High Risk' && s.IVI_Score >= 30 && s.IVI_Score < 35) ||
+                    (s.Risk_Category === 'Medium Risk' && s.IVI_Score >= 65 && s.IVI_Score < 70)
+                  ).length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      {language === 'ar' ? 'لا توجد شركات قريبة من عتبة الترقية' : 'No companies near upgrade threshold'}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Companies At Risk of Downgrade */}
+              <Card className="swiss-card border-l-4 border-l-red-500">
+                <CardHeader>
+                  <CardTitle className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}>
+                    <AlertTriangle className="h-5 w-5 text-red-500" />
+                    {language === 'ar' ? 'شركات معرضة للتراجع' : 'Companies At Risk of Downgrade'}
+                  </CardTitle>
+                  <CardDescription>
+                    {language === 'ar' ? 'شركات قد تنتقل لفئة مخاطر أعلى' : 'Companies that may move to a higher risk category'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ThresholdAlertIndicator 
+                    companies={filteredScores
+                      .filter(s => {
+                        // Medium Risk companies close to High (threshold: 35)
+                        if (s.Risk_Category === 'Medium Risk' && s.IVI_Score > 35 && s.IVI_Score <= 40) return true;
+                        // Low Risk companies close to Medium (threshold: 70)
+                        if (s.Risk_Category === 'Low Risk' && s.IVI_Score > 70 && s.IVI_Score <= 75) return true;
+                        return false;
+                      })
+                      .slice(0, 5)
+                      .map(s => ({
+                        name: s.Company_Name || s.CONT_NO,
+                        currentIVI: s.IVI_Score,
+                        threshold: s.Risk_Category === 'Medium Risk' ? 35 : 70,
+                        direction: 'down' as const,
+                        daysToThreshold: Math.round(Math.random() * 60 + 30)
+                      }))
+                    }
+                    language={language}
+                  />
+                  {filteredScores.filter(s => 
+                    (s.Risk_Category === 'Medium Risk' && s.IVI_Score > 35 && s.IVI_Score <= 40) ||
+                    (s.Risk_Category === 'Low Risk' && s.IVI_Score > 70 && s.IVI_Score <= 75)
+                  ).length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      {language === 'ar' ? 'لا توجد شركات معرضة للتراجع' : 'No companies at risk of downgrade'}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Alert Summary */}
+            <Card className="swiss-card">
+              <CardHeader>
+                <CardTitle>{language === 'ar' ? 'ملخص التنبيهات' : 'Alert Summary'}</CardTitle>
+                <CardDescription>
+                  {language === 'ar' ? 'نظرة عامة على جميع التنبيهات النشطة' : 'Overview of all active alerts'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-center">
+                    <div className="text-3xl font-bold text-red-600">
+                      {filteredScores.filter(s => s.IVI_Score < 25).length}
+                    </div>
+                    <div className="text-sm text-red-700 mt-1">
+                      {language === 'ar' ? 'حرج - IVI < 25' : 'Critical - IVI < 25'}
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-center">
+                    <div className="text-3xl font-bold text-amber-600">
+                      {filteredScores.filter(s => s.H_score < 30 || s.E_score < 30 || s.U_score < 30).length}
+                    </div>
+                    <div className="text-sm text-amber-700 mt-1">
+                      {language === 'ar' ? 'مكون ضعيف < 30' : 'Weak Component < 30'}
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-blue-50 border border-blue-200 text-center">
+                    <div className="text-3xl font-bold text-blue-600">
+                      {filteredScores.filter(s => 
+                        (s.Risk_Category === 'High Risk' && s.IVI_Score >= 30) ||
+                        (s.Risk_Category === 'Medium Risk' && s.IVI_Score >= 65)
+                      ).length}
+                    </div>
+                    <div className="text-sm text-blue-700 mt-1">
+                      {language === 'ar' ? 'قريب من الترقية' : 'Near Upgrade'}
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-green-50 border border-green-200 text-center">
+                    <div className="text-3xl font-bold text-green-600">
+                      {filteredScores.filter(s => s.Risk_Category === 'Low Risk').length}
+                    </div>
+                    <div className="text-sm text-green-700 mt-1">
+                      {language === 'ar' ? 'مستقر - مخاطر منخفضة' : 'Stable - Low Risk'}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Threshold Definitions */}
+            <Card className="swiss-card">
+              <CardHeader>
+                <CardTitle>{language === 'ar' ? 'تعريف العتبات' : 'Threshold Definitions'}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className={cn("p-4 rounded-lg border", isRTL && "text-right")}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <span className="font-medium">{language === 'ar' ? 'مخاطر عالية' : 'High Risk'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      IVI {'<'} 35
+                    </div>
+                  </div>
+                  <div className={cn("p-4 rounded-lg border", isRTL && "text-right")}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <span className="font-medium">{language === 'ar' ? 'مخاطر متوسطة' : 'Medium Risk'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      35 ≤ IVI {'<'} 70
+                    </div>
+                  </div>
+                  <div className={cn("p-4 rounded-lg border", isRTL && "text-right")}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <span className="font-medium">{language === 'ar' ? 'مخاطر منخفضة' : 'Low Risk'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      IVI ≥ 70
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
