@@ -206,3 +206,17 @@
 - [x] Support Arabic/English translations
 - [x] Add route and sidebar link
 - [x] Test and save checkpoint
+
+## Phase 26: Company Classification System
+- [x] Review original data files to identify classification criteria
+- [x] Define SME classification (small/medium companies)
+- [x] Define Key Account classification (large companies)
+- [x] Define Providers classification (hospitals, clinics)
+- [x] Define Pre-authorisation data structure
+- [x] Update database schema with company_type field
+- [x] Create SME Clients page with filters and stats
+- [x] Create Key Accounts page with filters and stats
+- [x] Create Providers page with filters and stats
+- [x] Add navigation links for all classification pages
+- [x] Support Arabic/English translations
+- [x] Test and save checkpoint

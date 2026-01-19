@@ -21,6 +21,9 @@ import PDFReport from "./pages/PDFReport";
 import CompanyComparison from "./pages/CompanyComparison";
 import Scenarios from "./pages/Scenarios";
 import ROICalculator from "./pages/ROICalculator";
+import SMEClients from "./pages/SMEClients";
+import KeyAccounts from "./pages/KeyAccounts";
+import Providers from "./pages/Providers";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -42,6 +45,9 @@ function Router() {
       <Route path={"/compare"} component={CompanyComparison} />
       <Route path={"/scenarios"} component={Scenarios} />
       <Route path={"/roi-calculator"} component={ROICalculator} />
+      <Route path={"/sme-clients"} component={SMEClients} />
+      <Route path={"/key-accounts"} component={KeyAccounts} />
+      <Route path={"/providers"} component={Providers} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

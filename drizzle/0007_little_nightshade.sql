@@ -1,0 +1,2 @@
+ALTER TABLE `corporate_clients` ADD `companyType` enum('SME','Key Account') DEFAULT 'SME';--> statement-breakpoint
+ALTER TABLE `ivi_scores` ADD `iviCompanyType` enum('SME','Key Account') DEFAULT 'SME';
