@@ -6,11 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FeatureImportance, fetchCsvData, FuturePrediction, IVIScore, Recommendation } from "@/lib/csv";
 import { trpc } from "@/lib/trpc";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Activity, AlertTriangle, BarChart3, Building2, Download, FileSpreadsheet, FileText, Filter, Phone, TrendingUp, Users } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { useEffect, useMemo, useState } from "react";
 
 export default function Dashboard() {
+  const { t, isRTL, language } = useLanguage();
   const [iviScores, setIviScores] = useState<IVIScore[]>([]);
   const [futurePredictions, setFuturePredictions] = useState<FuturePrediction[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -94,24 +96,34 @@ export default function Dashboard() {
     });
   }, [displayScores, regionFilter, sectorFilter, riskFilter]);
 
+  // Translate risk category
+  const translateRisk = (risk: string) => {
+    if (language === 'ar') {
+      if (risk === 'High Risk') return 'مخاطر عالية';
+      if (risk === 'Medium Risk') return 'مخاطر متوسطة';
+      if (risk === 'Low Risk') return 'مخاطر منخفضة';
+    }
+    return risk;
+  };
+
   // Export to PDF function
   const exportToPDF = () => {
-    // Create a printable version of the dashboard
+    const isArabic = language === 'ar';
     const printContent = `
       <!DOCTYPE html>
-      <html>
+      <html dir="${isArabic ? 'rtl' : 'ltr'}" lang="${language}">
       <head>
-        <title>IVI Dashboard Report</title>
+        <title>${isArabic ? 'تقرير لوحة IVI' : 'IVI Dashboard Report'}</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
+          body { font-family: ${isArabic ? 'Arial, Tahoma, sans-serif' : 'Arial, sans-serif'}; padding: 20px; direction: ${isArabic ? 'rtl' : 'ltr'}; }
           h1 { color: #1a1a1a; border-bottom: 2px solid #0066cc; padding-bottom: 10px; }
           h2 { color: #333; margin-top: 30px; }
           .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 20px 0; }
-          .kpi-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+          .kpi-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; }
           .kpi-value { font-size: 24px; font-weight: bold; color: #0066cc; }
           .kpi-label { color: #666; font-size: 14px; }
           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+          th, td { border: 1px solid #ddd; padding: 10px; text-align: ${isArabic ? 'right' : 'left'}; }
           th { background-color: #f5f5f5; }
           .high-risk { color: #dc2626; }
           .medium-risk { color: #ca8a04; }
@@ -120,42 +132,42 @@ export default function Dashboard() {
         </style>
       </head>
       <body>
-        <h1>Intelligent Value Index (IVI) Dashboard Report</h1>
-        <p>Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <h1>${isArabic ? 'تقرير مؤشر القيمة الذكي (IVI)' : 'Intelligent Value Index (IVI) Dashboard Report'}</h1>
+        <p>${isArabic ? 'تم الإنشاء في:' : 'Generated on:'} ${new Date().toLocaleDateString(isArabic ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
         
-        <h2>Executive Summary</h2>
+        <h2>${isArabic ? 'الملخص التنفيذي' : 'Executive Summary'}</h2>
         <div class="kpi-grid">
           <div class="kpi-card">
             <div class="kpi-value">${filteredScores.length}</div>
-            <div class="kpi-label">Total Companies</div>
+            <div class="kpi-label">${isArabic ? 'إجمالي الشركات' : 'Total Companies'}</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-value">${(filteredScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (filteredScores.length || 1)).toFixed(1)}</div>
-            <div class="kpi-label">Average IVI Score</div>
+            <div class="kpi-label">${isArabic ? 'متوسط نقاط IVI' : 'Average IVI Score'}</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-value">${filteredScores.filter(s => s.Risk_Category === 'High Risk').length}</div>
-            <div class="kpi-label">High Risk Clients</div>
+            <div class="kpi-label">${isArabic ? 'عملاء عالي المخاطر' : 'High Risk Clients'}</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-value">${filteredScores.filter(s => s.Risk_Category === 'Low Risk').length}</div>
-            <div class="kpi-label">Low Risk Clients</div>
+            <div class="kpi-label">${isArabic ? 'عملاء منخفض المخاطر' : 'Low Risk Clients'}</div>
           </div>
         </div>
         
-        <h2>Client Performance Matrix</h2>
+        <h2>${isArabic ? 'مصفوفة أداء العملاء' : 'Client Performance Matrix'}</h2>
         <table>
           <thead>
             <tr>
-              <th>Client ID</th>
-              <th>Company Name</th>
-              <th>Region</th>
-              <th>Sector</th>
-              <th>Risk Category</th>
-              <th>H Score</th>
-              <th>E Score</th>
-              <th>U Score</th>
-              <th>IVI Score</th>
+              <th>${isArabic ? 'رقم العميل' : 'Client ID'}</th>
+              <th>${isArabic ? 'اسم الشركة' : 'Company Name'}</th>
+              <th>${isArabic ? 'المنطقة' : 'Region'}</th>
+              <th>${isArabic ? 'القطاع' : 'Sector'}</th>
+              <th>${isArabic ? 'فئة المخاطر' : 'Risk Category'}</th>
+              <th>${isArabic ? 'نقاط H' : 'H Score'}</th>
+              <th>${isArabic ? 'نقاط E' : 'E Score'}</th>
+              <th>${isArabic ? 'نقاط U' : 'U Score'}</th>
+              <th>${isArabic ? 'نقاط IVI' : 'IVI Score'}</th>
             </tr>
           </thead>
           <tbody>
@@ -165,7 +177,7 @@ export default function Dashboard() {
                 <td>${score.Company_Name || '-'}</td>
                 <td>${score.Region || '-'}</td>
                 <td>${score.Sector || '-'}</td>
-                <td class="${score.Risk_Category === 'High Risk' ? 'high-risk' : score.Risk_Category === 'Medium Risk' ? 'medium-risk' : 'low-risk'}">${score.Risk_Category}</td>
+                <td class="${score.Risk_Category === 'High Risk' ? 'high-risk' : score.Risk_Category === 'Medium Risk' ? 'medium-risk' : 'low-risk'}">${translateRisk(score.Risk_Category)}</td>
                 <td>${score.H_score.toFixed(1)}</td>
                 <td>${score.E_score.toFixed(1)}</td>
                 <td>${score.U_score.toFixed(1)}</td>
@@ -175,16 +187,16 @@ export default function Dashboard() {
           </tbody>
         </table>
         
-        <h2>Risk Distribution</h2>
+        <h2>${isArabic ? 'توزيع المخاطر' : 'Risk Distribution'}</h2>
         <ul>
-          <li><strong>High Risk:</strong> ${filteredScores.filter(s => s.Risk_Category === 'High Risk').length} clients (${((filteredScores.filter(s => s.Risk_Category === 'High Risk').length / (filteredScores.length || 1)) * 100).toFixed(1)}%)</li>
-          <li><strong>Medium Risk:</strong> ${filteredScores.filter(s => s.Risk_Category === 'Medium Risk').length} clients (${((filteredScores.filter(s => s.Risk_Category === 'Medium Risk').length / (filteredScores.length || 1)) * 100).toFixed(1)}%)</li>
-          <li><strong>Low Risk:</strong> ${filteredScores.filter(s => s.Risk_Category === 'Low Risk').length} clients (${((filteredScores.filter(s => s.Risk_Category === 'Low Risk').length / (filteredScores.length || 1)) * 100).toFixed(1)}%)</li>
+          <li><strong>${isArabic ? 'مخاطر عالية:' : 'High Risk:'}</strong> ${filteredScores.filter(s => s.Risk_Category === 'High Risk').length} ${isArabic ? 'عميل' : 'clients'} (${((filteredScores.filter(s => s.Risk_Category === 'High Risk').length / (filteredScores.length || 1)) * 100).toFixed(1)}%)</li>
+          <li><strong>${isArabic ? 'مخاطر متوسطة:' : 'Medium Risk:'}</strong> ${filteredScores.filter(s => s.Risk_Category === 'Medium Risk').length} ${isArabic ? 'عميل' : 'clients'} (${((filteredScores.filter(s => s.Risk_Category === 'Medium Risk').length / (filteredScores.length || 1)) * 100).toFixed(1)}%)</li>
+          <li><strong>${isArabic ? 'مخاطر منخفضة:' : 'Low Risk:'}</strong> ${filteredScores.filter(s => s.Risk_Category === 'Low Risk').length} ${isArabic ? 'عميل' : 'clients'} (${((filteredScores.filter(s => s.Risk_Category === 'Low Risk').length / (filteredScores.length || 1)) * 100).toFixed(1)}%)</li>
         </ul>
         
         <div class="footer">
-          <p>IVI Dashboard - Intelligent Value Index | Powered by Bupa Arabia</p>
-          <p>This report is confidential and intended for internal use only.</p>
+          <p>${isArabic ? 'لوحة IVI - مؤشر القيمة الذكي | مدعوم من بوبا العربية' : 'IVI Dashboard - Intelligent Value Index | Powered by Bupa Arabia'}</p>
+          <p>${isArabic ? 'هذا التقرير سري ومخصص للاستخدام الداخلي فقط.' : 'This report is confidential and intended for internal use only.'}</p>
         </div>
       </body>
       </html>
@@ -200,17 +212,18 @@ export default function Dashboard() {
 
   // Export to Excel function
   const exportToExcel = () => {
+    const isArabic = language === 'ar';
     // Prepare data for export
     const exportData = filteredScores.map(score => ({
-      'Client ID': score.CONT_NO,
-      'Company Name': score.Company_Name || '-',
-      'Region': score.Region || '-',
-      'Sector': score.Sector || '-',
-      'Risk Category': score.Risk_Category,
-      'H Score': score.H_score.toFixed(1),
-      'E Score': score.E_score.toFixed(1),
-      'U Score': score.U_score.toFixed(1),
-      'IVI Score': score.IVI_Score.toFixed(1),
+      [isArabic ? 'رقم العميل' : 'Client ID']: score.CONT_NO,
+      [isArabic ? 'اسم الشركة' : 'Company Name']: score.Company_Name || '-',
+      [isArabic ? 'المنطقة' : 'Region']: score.Region || '-',
+      [isArabic ? 'القطاع' : 'Sector']: score.Sector || '-',
+      [isArabic ? 'فئة المخاطر' : 'Risk Category']: translateRisk(score.Risk_Category),
+      [isArabic ? 'نقاط H' : 'H Score']: score.H_score.toFixed(1),
+      [isArabic ? 'نقاط E' : 'E Score']: score.E_score.toFixed(1),
+      [isArabic ? 'نقاط U' : 'U Score']: score.U_score.toFixed(1),
+      [isArabic ? 'نقاط IVI' : 'IVI Score']: score.IVI_Score.toFixed(1),
     }));
 
     // Create workbook and worksheet
@@ -218,55 +231,55 @@ export default function Dashboard() {
     
     // Main data sheet
     const ws = XLSX.utils.json_to_sheet(exportData);
-    XLSX.utils.book_append_sheet(wb, ws, 'IVI Scores');
+    XLSX.utils.book_append_sheet(wb, ws, isArabic ? 'نقاط IVI' : 'IVI Scores');
 
     // Summary sheet
     const summaryData = [
-      { 'Metric': 'Total Companies', 'Value': filteredScores.length },
-      { 'Metric': 'Average IVI Score', 'Value': (filteredScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (filteredScores.length || 1)).toFixed(1) },
-      { 'Metric': 'High Risk Clients', 'Value': filteredScores.filter(s => s.Risk_Category === 'High Risk').length },
-      { 'Metric': 'Medium Risk Clients', 'Value': filteredScores.filter(s => s.Risk_Category === 'Medium Risk').length },
-      { 'Metric': 'Low Risk Clients', 'Value': filteredScores.filter(s => s.Risk_Category === 'Low Risk').length },
-      { 'Metric': 'Average H Score', 'Value': (filteredScores.reduce((sum, s) => sum + s.H_score, 0) / (filteredScores.length || 1)).toFixed(1) },
-      { 'Metric': 'Average E Score', 'Value': (filteredScores.reduce((sum, s) => sum + s.E_score, 0) / (filteredScores.length || 1)).toFixed(1) },
-      { 'Metric': 'Average U Score', 'Value': (filteredScores.reduce((sum, s) => sum + s.U_score, 0) / (filteredScores.length || 1)).toFixed(1) },
-      { 'Metric': 'Report Generated', 'Value': new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) },
+      { [isArabic ? 'المقياس' : 'Metric']: isArabic ? 'إجمالي الشركات' : 'Total Companies', [isArabic ? 'القيمة' : 'Value']: filteredScores.length },
+      { [isArabic ? 'المقياس' : 'Metric']: isArabic ? 'متوسط نقاط IVI' : 'Average IVI Score', [isArabic ? 'القيمة' : 'Value']: (filteredScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (filteredScores.length || 1)).toFixed(1) },
+      { [isArabic ? 'المقياس' : 'Metric']: isArabic ? 'عملاء عالي المخاطر' : 'High Risk Clients', [isArabic ? 'القيمة' : 'Value']: filteredScores.filter(s => s.Risk_Category === 'High Risk').length },
+      { [isArabic ? 'المقياس' : 'Metric']: isArabic ? 'عملاء متوسط المخاطر' : 'Medium Risk Clients', [isArabic ? 'القيمة' : 'Value']: filteredScores.filter(s => s.Risk_Category === 'Medium Risk').length },
+      { [isArabic ? 'المقياس' : 'Metric']: isArabic ? 'عملاء منخفض المخاطر' : 'Low Risk Clients', [isArabic ? 'القيمة' : 'Value']: filteredScores.filter(s => s.Risk_Category === 'Low Risk').length },
+      { [isArabic ? 'المقياس' : 'Metric']: isArabic ? 'متوسط نقاط H' : 'Average H Score', [isArabic ? 'القيمة' : 'Value']: (filteredScores.reduce((sum, s) => sum + s.H_score, 0) / (filteredScores.length || 1)).toFixed(1) },
+      { [isArabic ? 'المقياس' : 'Metric']: isArabic ? 'متوسط نقاط E' : 'Average E Score', [isArabic ? 'القيمة' : 'Value']: (filteredScores.reduce((sum, s) => sum + s.E_score, 0) / (filteredScores.length || 1)).toFixed(1) },
+      { [isArabic ? 'المقياس' : 'Metric']: isArabic ? 'متوسط نقاط U' : 'Average U Score', [isArabic ? 'القيمة' : 'Value']: (filteredScores.reduce((sum, s) => sum + s.U_score, 0) / (filteredScores.length || 1)).toFixed(1) },
+      { [isArabic ? 'المقياس' : 'Metric']: isArabic ? 'تاريخ التقرير' : 'Report Generated', [isArabic ? 'القيمة' : 'Value']: new Date().toLocaleDateString(isArabic ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) },
     ];
     const summaryWs = XLSX.utils.json_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+    XLSX.utils.book_append_sheet(wb, summaryWs, isArabic ? 'الملخص' : 'Summary');
 
     // Risk distribution by region
     const regionData = regions.map(region => {
       const regionScores = filteredScores.filter(s => s.Region === region);
       return {
-        'Region': region,
-        'Total': regionScores.length,
-        'High Risk': regionScores.filter(s => s.Risk_Category === 'High Risk').length,
-        'Medium Risk': regionScores.filter(s => s.Risk_Category === 'Medium Risk').length,
-        'Low Risk': regionScores.filter(s => s.Risk_Category === 'Low Risk').length,
-        'Avg IVI': (regionScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (regionScores.length || 1)).toFixed(1),
+        [isArabic ? 'المنطقة' : 'Region']: region,
+        [isArabic ? 'الإجمالي' : 'Total']: regionScores.length,
+        [isArabic ? 'مخاطر عالية' : 'High Risk']: regionScores.filter(s => s.Risk_Category === 'High Risk').length,
+        [isArabic ? 'مخاطر متوسطة' : 'Medium Risk']: regionScores.filter(s => s.Risk_Category === 'Medium Risk').length,
+        [isArabic ? 'مخاطر منخفضة' : 'Low Risk']: regionScores.filter(s => s.Risk_Category === 'Low Risk').length,
+        [isArabic ? 'متوسط IVI' : 'Avg IVI']: (regionScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (regionScores.length || 1)).toFixed(1),
       };
     });
     if (regionData.length > 0) {
       const regionWs = XLSX.utils.json_to_sheet(regionData);
-      XLSX.utils.book_append_sheet(wb, regionWs, 'By Region');
+      XLSX.utils.book_append_sheet(wb, regionWs, isArabic ? 'حسب المنطقة' : 'By Region');
     }
 
     // Risk distribution by sector
     const sectorData = sectors.map(sector => {
       const sectorScores = filteredScores.filter(s => s.Sector === sector);
       return {
-        'Sector': sector,
-        'Total': sectorScores.length,
-        'High Risk': sectorScores.filter(s => s.Risk_Category === 'High Risk').length,
-        'Medium Risk': sectorScores.filter(s => s.Risk_Category === 'Medium Risk').length,
-        'Low Risk': sectorScores.filter(s => s.Risk_Category === 'Low Risk').length,
-        'Avg IVI': (sectorScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (sectorScores.length || 1)).toFixed(1),
+        [isArabic ? 'القطاع' : 'Sector']: sector,
+        [isArabic ? 'الإجمالي' : 'Total']: sectorScores.length,
+        [isArabic ? 'مخاطر عالية' : 'High Risk']: sectorScores.filter(s => s.Risk_Category === 'High Risk').length,
+        [isArabic ? 'مخاطر متوسطة' : 'Medium Risk']: sectorScores.filter(s => s.Risk_Category === 'Medium Risk').length,
+        [isArabic ? 'مخاطر منخفضة' : 'Low Risk']: sectorScores.filter(s => s.Risk_Category === 'Low Risk').length,
+        [isArabic ? 'متوسط IVI' : 'Avg IVI']: (sectorScores.reduce((sum, s) => sum + s.IVI_Score, 0) / (sectorScores.length || 1)).toFixed(1),
       };
     });
     if (sectorData.length > 0) {
       const sectorWs = XLSX.utils.json_to_sheet(sectorData);
-      XLSX.utils.book_append_sheet(wb, sectorWs, 'By Sector');
+      XLSX.utils.book_append_sheet(wb, sectorWs, isArabic ? 'حسب القطاع' : 'By Sector');
     }
 
     // Download file
@@ -298,13 +311,13 @@ export default function Dashboard() {
   const improvementPercent = avgIVI > 0 ? (improvement / avgIVI) * 100 : 0;
 
   const riskData = [
-    { name: 'High Risk', value: highRiskCount, color: 'var(--destructive)' },
-    { name: 'Medium Risk', value: mediumRiskCount, color: 'var(--chart-3)' },
-    { name: 'Low Risk', value: lowRiskCount, color: 'var(--chart-4)' },
+    { name: language === 'ar' ? 'مخاطر عالية' : 'High Risk', value: highRiskCount, color: 'var(--destructive)' },
+    { name: language === 'ar' ? 'مخاطر متوسطة' : 'Medium Risk', value: mediumRiskCount, color: 'var(--chart-3)' },
+    { name: language === 'ar' ? 'مخاطر منخفضة' : 'Low Risk', value: lowRiskCount, color: 'var(--chart-4)' },
   ];
 
   const scoresData = [
-    { name: 'Average', H_score: avgH, E_score: avgE, U_score: avgU }
+    { name: language === 'ar' ? 'المتوسط' : 'Average', H_score: avgH, E_score: avgE, U_score: avgU }
   ];
 
   // Format large numbers
@@ -317,21 +330,21 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Executive Overview</h2>
+        <div className={cn("flex flex-col md:flex-row md:items-center md:justify-between gap-4", isRTL && "md:flex-row-reverse")}>
+          <div className={isRTL ? "text-right" : ""}>
+            <h2 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h2>
             <p className="text-muted-foreground mt-2">
-              Comprehensive analysis of client portfolio health, experience, and utilization efficiency.
+              {t('dashboard.subtitle')}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className={cn("flex gap-2", isRTL && "flex-row-reverse")}>
             <Button onClick={exportToPDF} variant="outline" className="gap-2">
               <Download className="h-4 w-4" />
-              PDF
+              {t('common.pdf')}
             </Button>
             <Button onClick={exportToExcel} variant="outline" className="gap-2">
               <FileSpreadsheet className="h-4 w-4" />
-              Excel
+              {t('common.excel')}
             </Button>
           </div>
         </div>
@@ -339,21 +352,21 @@ export default function Dashboard() {
         {/* Filters Section */}
         <Card className="swiss-card">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className={cn("text-lg flex items-center gap-2", isRTL && "flex-row-reverse")}>
               <Filter className="h-5 w-5" />
-              Filters
+              {t('common.filters')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Region</label>
+                <label className={cn("text-sm font-medium", isRTL && "block text-right")}>{t('common.region')}</label>
                 <Select value={regionFilter} onValueChange={setRegionFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="All Regions" />
+                    <SelectValue placeholder={t('common.allRegions')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Regions</SelectItem>
+                    <SelectItem value="all">{t('common.allRegions')}</SelectItem>
                     {regions.map(region => (
                       <SelectItem key={region} value={region}>{region}</SelectItem>
                     ))}
@@ -361,13 +374,13 @@ export default function Dashboard() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Sector</label>
+                <label className={cn("text-sm font-medium", isRTL && "block text-right")}>{t('common.sector')}</label>
                 <Select value={sectorFilter} onValueChange={setSectorFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="All Sectors" />
+                    <SelectValue placeholder={t('common.allSectors')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Sectors</SelectItem>
+                    <SelectItem value="all">{t('common.allSectors')}</SelectItem>
                     {sectors.map(sector => (
                       <SelectItem key={sector} value={sector}>{sector}</SelectItem>
                     ))}
@@ -375,16 +388,16 @@ export default function Dashboard() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Risk Category</label>
+                <label className={cn("text-sm font-medium", isRTL && "block text-right")}>{t('common.riskCategory')}</label>
                 <Select value={riskFilter} onValueChange={setRiskFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="All Risk Levels" />
+                    <SelectValue placeholder={t('common.allRiskLevels')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Risk Levels</SelectItem>
-                    <SelectItem value="High Risk">High Risk</SelectItem>
-                    <SelectItem value="Medium Risk">Medium Risk</SelectItem>
-                    <SelectItem value="Low Risk">Low Risk</SelectItem>
+                    <SelectItem value="all">{t('common.allRiskLevels')}</SelectItem>
+                    <SelectItem value="High Risk">{language === 'ar' ? 'مخاطر عالية' : 'High Risk'}</SelectItem>
+                    <SelectItem value="Medium Risk">{language === 'ar' ? 'مخاطر متوسطة' : 'Medium Risk'}</SelectItem>
+                    <SelectItem value="Low Risk">{language === 'ar' ? 'مخاطر منخفضة' : 'Low Risk'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -398,13 +411,16 @@ export default function Dashboard() {
                   }}
                   className="w-full"
                 >
-                  Clear Filters
+                  {t('common.clearFilters')}
                 </Button>
               </div>
             </div>
             {(regionFilter !== "all" || sectorFilter !== "all" || riskFilter !== "all") && (
-              <div className="mt-4 text-sm text-muted-foreground">
-                Showing {filteredScores.length} of {displayScores.length} companies
+              <div className={cn("mt-4 text-sm text-muted-foreground", isRTL && "text-right")}>
+                {language === 'ar' 
+                  ? `عرض ${filteredScores.length} من ${displayScores.length} شركة`
+                  : `Showing ${filteredScores.length} of ${displayScores.length} companies`
+                }
               </div>
             )}
           </CardContent>
@@ -413,31 +429,31 @@ export default function Dashboard() {
         {/* Primary KPI Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <KPICard 
-            title="Total Companies" 
+            title={t('dashboard.totalCompanies')} 
             value={totalCompanies} 
             icon={<Users className="h-4 w-4" />}
-            description="Active corporate clients"
+            description={t('dashboard.activeClients')}
           />
           <KPICard 
-            title="Average IVI Score" 
+            title={t('dashboard.averageIVI')} 
             value={avgIVI.toFixed(1)} 
             icon={<Activity className="h-4 w-4" />}
-            description="Out of 100"
+            description={language === 'ar' ? 'من 100' : 'Out of 100'}
             trend={improvementPercent}
-            trendLabel="projected growth"
+            trendLabel={language === 'ar' ? 'نمو متوقع' : 'projected growth'}
           />
           <KPICard 
-            title="High Risk Clients" 
+            title={t('dashboard.highRiskClients')} 
             value={highRiskCount} 
             icon={<AlertTriangle className="h-4 w-4" />}
-            description={`${((highRiskCount/totalCompanies)*100).toFixed(0)}% of portfolio`}
+            description={`${((highRiskCount/totalCompanies)*100).toFixed(0)}% ${t('dashboard.ofPortfolio')}`}
             className="border-l-4 border-l-destructive"
           />
           <KPICard 
-            title="Projected Improvement" 
+            title={t('dashboard.projectedImprovement')} 
             value={`+${improvement.toFixed(1)}`} 
             icon={<TrendingUp className="h-4 w-4" />}
-            description="Next 12 months"
+            description={t('dashboard.next12Months')}
             className="bg-primary/5"
           />
         </div>
@@ -445,62 +461,62 @@ export default function Dashboard() {
         {/* Secondary KPI Cards - Data Statistics */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <Card className="swiss-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Claims</CardTitle>
+            <CardHeader className={cn("flex flex-row items-center justify-between space-y-0 pb-2", isRTL && "flex-row-reverse")}>
+              <CardTitle className="text-sm font-medium">{t('dashboard.totalClaims')}</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatNumber(Number(claimsStats?.totalClaims || 0))}</div>
               <p className="text-xs text-muted-foreground">
-                SAR {formatNumber(Number(claimsStats?.totalClaimed || 0))} claimed
+                SAR {formatNumber(Number(claimsStats?.totalClaimed || 0))} {language === 'ar' ? 'مطالبة' : 'claimed'}
               </p>
             </CardContent>
           </Card>
           <Card className="swiss-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Approved Amount</CardTitle>
+            <CardHeader className={cn("flex flex-row items-center justify-between space-y-0 pb-2", isRTL && "flex-row-reverse")}>
+              <CardTitle className="text-sm font-medium">{t('dashboard.approvedAmount')}</CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">SAR {formatNumber(Number(claimsStats?.totalApproved || 0))}</div>
               <p className="text-xs text-muted-foreground">
-                {claimsStats?.totalClaimed ? ((Number(claimsStats.totalApproved) / Number(claimsStats.totalClaimed)) * 100).toFixed(1) : 0}% approval rate
+                {claimsStats?.totalClaimed ? ((Number(claimsStats.totalApproved) / Number(claimsStats.totalClaimed)) * 100).toFixed(1) : 0}% {language === 'ar' ? 'نسبة الموافقة' : 'approval rate'}
               </p>
             </CardContent>
           </Card>
           <Card className="swiss-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Call Center</CardTitle>
+            <CardHeader className={cn("flex flex-row items-center justify-between space-y-0 pb-2", isRTL && "flex-row-reverse")}>
+              <CardTitle className="text-sm font-medium">{t('dashboard.callCenter')}</CardTitle>
               <Phone className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatNumber(Number(callStats?.total || 0))}</div>
               <p className="text-xs text-muted-foreground">
-                Avg satisfaction: {Number(callStats?.avgSatisfaction || 0).toFixed(1)}/5
+                {language === 'ar' ? 'متوسط الرضا:' : 'Avg satisfaction:'} {Number(callStats?.avgSatisfaction || 0).toFixed(1)}/5
               </p>
             </CardContent>
           </Card>
           <Card className="swiss-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pre-Authorizations</CardTitle>
+            <CardHeader className={cn("flex flex-row items-center justify-between space-y-0 pb-2", isRTL && "flex-row-reverse")}>
+              <CardTitle className="text-sm font-medium">{t('dashboard.authorizations')}</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatNumber(Number(preAuthStats?.total || 0))}</div>
               <p className="text-xs text-muted-foreground">
-                SAR {formatNumber(Number(preAuthStats?.totalCost || 0))} estimated
+                SAR {formatNumber(Number(preAuthStats?.totalCost || 0))} {language === 'ar' ? 'تقديري' : 'estimated'}
               </p>
             </CardContent>
           </Card>
           <Card className="swiss-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Providers</CardTitle>
+            <CardHeader className={cn("flex flex-row items-center justify-between space-y-0 pb-2", isRTL && "flex-row-reverse")}>
+              <CardTitle className="text-sm font-medium">{language === 'ar' ? 'مقدمو الخدمات' : 'Providers'}</CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatNumber(providerStats?.total || 0)}</div>
               <p className="text-xs text-muted-foreground">
-                Healthcare facilities
+                {language === 'ar' ? 'منشآت صحية' : 'Healthcare facilities'}
               </p>
             </CardContent>
           </Card>
@@ -508,19 +524,19 @@ export default function Dashboard() {
 
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Detailed Analytics</TabsTrigger>
-            <TabsTrigger value="predictions">Future Predictions</TabsTrigger>
-            <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+            <TabsTrigger value="overview">{t('dashboard.overview')}</TabsTrigger>
+            <TabsTrigger value="analytics">{t('dashboard.detailedAnalytics')}</TabsTrigger>
+            <TabsTrigger value="predictions">{t('dashboard.futurePredictions')}</TabsTrigger>
+            <TabsTrigger value="recommendations">{t('dashboard.recommendations')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
               <Card className="col-span-4 swiss-card">
                 <CardHeader>
-                  <CardTitle>Risk Distribution</CardTitle>
+                  <CardTitle>{t('dashboard.riskDistribution')}</CardTitle>
                   <CardDescription>
-                    Client portfolio segmentation by risk category
+                    {language === 'ar' ? 'تقسيم محفظة العملاء حسب فئة المخاطر' : 'Client portfolio segmentation by risk category'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pl-2">
@@ -529,9 +545,9 @@ export default function Dashboard() {
               </Card>
               <Card className="col-span-3 swiss-card">
                 <CardHeader>
-                  <CardTitle>Component Scores</CardTitle>
+                  <CardTitle>{t('dashboard.componentScores')}</CardTitle>
                   <CardDescription>
-                    Average performance across H, E, U pillars
+                    {language === 'ar' ? 'متوسط الأداء عبر ركائز H, E, U' : 'Average performance across H, E, U pillars'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -544,9 +560,9 @@ export default function Dashboard() {
             {claimsStats?.byStatus && (
               <Card className="swiss-card">
                 <CardHeader>
-                  <CardTitle>Claims Status Distribution</CardTitle>
+                  <CardTitle>{language === 'ar' ? 'توزيع حالة المطالبات' : 'Claims Status Distribution'}</CardTitle>
                   <CardDescription>
-                    Breakdown of claims by approval status
+                    {language === 'ar' ? 'تفصيل المطالبات حسب حالة الموافقة' : 'Breakdown of claims by approval status'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -567,9 +583,9 @@ export default function Dashboard() {
             
             <Card className="swiss-card">
               <CardHeader>
-                <CardTitle>Top Risk Drivers</CardTitle>
+                <CardTitle>{t('dashboard.topRiskDrivers')}</CardTitle>
                 <CardDescription>
-                  Key factors influencing client retention and IVI scores
+                  {language === 'ar' ? 'العوامل الرئيسية المؤثرة على الاحتفاظ بالعملاء ونقاط IVI' : 'Key factors influencing client retention and IVI scores'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -581,44 +597,44 @@ export default function Dashboard() {
           <TabsContent value="analytics" className="space-y-4">
             <Card className="swiss-card">
               <CardHeader>
-                <CardTitle>Client Performance Matrix</CardTitle>
-                <CardDescription>Detailed breakdown of IVI scores for all clients</CardDescription>
+                <CardTitle>{language === 'ar' ? 'مصفوفة أداء العملاء' : 'Client Performance Matrix'}</CardTitle>
+                <CardDescription>{language === 'ar' ? 'تفصيل نقاط IVI لجميع العملاء' : 'Detailed breakdown of IVI scores for all clients'}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="relative w-full overflow-auto">
                   <table className="w-full caption-bottom text-sm">
                     <thead className="[&_tr]:border-b">
                       <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Client ID</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Company</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Region</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Risk Category</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Health (H)</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Experience (E)</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Utilization (U)</th>
-                        <th className="h-12 px-4 text-right align-middle font-bold text-primary">IVI Score</th>
+                        <th className={cn("h-12 px-4 align-middle font-medium text-muted-foreground", isRTL ? "text-right" : "text-left")}>{language === 'ar' ? 'رقم العميل' : 'Client ID'}</th>
+                        <th className={cn("h-12 px-4 align-middle font-medium text-muted-foreground", isRTL ? "text-right" : "text-left")}>{language === 'ar' ? 'الشركة' : 'Company'}</th>
+                        <th className={cn("h-12 px-4 align-middle font-medium text-muted-foreground", isRTL ? "text-right" : "text-left")}>{language === 'ar' ? 'المنطقة' : 'Region'}</th>
+                        <th className={cn("h-12 px-4 align-middle font-medium text-muted-foreground", isRTL ? "text-right" : "text-left")}>{language === 'ar' ? 'فئة المخاطر' : 'Risk Category'}</th>
+                        <th className={cn("h-12 px-4 align-middle font-medium text-muted-foreground", isRTL ? "text-left" : "text-right")}>{language === 'ar' ? 'الصحة (H)' : 'Health (H)'}</th>
+                        <th className={cn("h-12 px-4 align-middle font-medium text-muted-foreground", isRTL ? "text-left" : "text-right")}>{language === 'ar' ? 'التجربة (E)' : 'Experience (E)'}</th>
+                        <th className={cn("h-12 px-4 align-middle font-medium text-muted-foreground", isRTL ? "text-left" : "text-right")}>{language === 'ar' ? 'الاستخدام (U)' : 'Utilization (U)'}</th>
+                        <th className={cn("h-12 px-4 align-middle font-bold text-primary", isRTL ? "text-left" : "text-right")}>{language === 'ar' ? 'نقاط IVI' : 'IVI Score'}</th>
                       </tr>
                     </thead>
                     <tbody className="[&_tr:last-child]:border-0">
                       {filteredScores.map((client) => (
                         <tr key={client.CONT_NO} className="border-b transition-colors hover:bg-muted/50">
-                          <td className="p-4 align-middle font-medium">{client.CONT_NO}</td>
-                          <td className="p-4 align-middle">{client.Company_Name || '-'}</td>
-                          <td className="p-4 align-middle">{client.Region || '-'}</td>
-                          <td className="p-4 align-middle">
+                          <td className={cn("p-4 align-middle font-medium", isRTL && "text-right")}>{client.CONT_NO}</td>
+                          <td className={cn("p-4 align-middle", isRTL && "text-right")}>{client.Company_Name || '-'}</td>
+                          <td className={cn("p-4 align-middle", isRTL && "text-right")}>{client.Region || '-'}</td>
+                          <td className={cn("p-4 align-middle", isRTL && "text-right")}>
                             <span className={cn(
                               "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
                               client.Risk_Category === 'High Risk' ? "bg-red-100 text-red-800" :
                               client.Risk_Category === 'Medium Risk' ? "bg-yellow-100 text-yellow-800" :
                               "bg-green-100 text-green-800"
                             )}>
-                              {client.Risk_Category}
+                              {translateRisk(client.Risk_Category)}
                             </span>
                           </td>
-                          <td className="p-4 align-middle text-right">{(client.H_score || 0).toFixed(1)}</td>
-                          <td className="p-4 align-middle text-right">{(client.E_score || 0).toFixed(1)}</td>
-                          <td className="p-4 align-middle text-right">{(client.U_score || 0).toFixed(1)}</td>
-                          <td className="p-4 align-middle text-right font-bold">{(client.IVI_Score || 0).toFixed(1)}</td>
+                          <td className={cn("p-4 align-middle", isRTL ? "text-left" : "text-right")}>{(client.H_score || 0).toFixed(1)}</td>
+                          <td className={cn("p-4 align-middle", isRTL ? "text-left" : "text-right")}>{(client.E_score || 0).toFixed(1)}</td>
+                          <td className={cn("p-4 align-middle", isRTL ? "text-left" : "text-right")}>{(client.U_score || 0).toFixed(1)}</td>
+                          <td className={cn("p-4 align-middle font-bold", isRTL ? "text-left" : "text-right")}>{(client.IVI_Score || 0).toFixed(1)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -631,9 +647,9 @@ export default function Dashboard() {
           <TabsContent value="predictions" className="space-y-4">
             <Card className="swiss-card">
               <CardHeader>
-                <CardTitle>Projected IVI Improvement</CardTitle>
+                <CardTitle>{language === 'ar' ? 'التحسن المتوقع في IVI' : 'Projected IVI Improvement'}</CardTitle>
                 <CardDescription>
-                  Forecasted scores after implementing recommended interventions (12-month horizon)
+                  {language === 'ar' ? 'النقاط المتوقعة بعد تنفيذ التدخلات الموصى بها (أفق 12 شهر)' : 'Forecasted scores after implementing recommended interventions (12-month horizon)'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -651,11 +667,11 @@ export default function Dashboard() {
                   rec.Risk_Category === 'Medium Risk' ? "border-l-yellow-500" : "border-l-green-500"
                 )}>
                   <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
+                    <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
                       <CardTitle className="text-lg">{rec.CONT_NO}</CardTitle>
                       <span className="text-sm font-medium text-muted-foreground">IVI: {(rec.IVI_Score || 0).toFixed(1)}</span>
                     </div>
-                    <CardDescription>{rec.Risk_Category}</CardDescription>
+                    <CardDescription>{translateRisk(rec.Risk_Category)}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2 mt-2">

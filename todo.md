@@ -140,3 +140,14 @@
 - [x] Ensure Visualization & Storytelling criteria are visible (narrative, visuals)
 - [x] Add Vision 2030 alignment section
 - [x] Test all features and save checkpoint
+
+## Phase 20: Arabic Language Support & Enhanced Reports
+- [x] Create translation system with language context
+- [x] Create Arabic and English translation files
+- [x] Update Dashboard page with Arabic translations
+- [x] Update Predictions page with Arabic translations
+- [x] Update Project Evaluation page with Arabic translations
+- [x] Add language toggle button in header/sidebar
+- [x] Create detailed PDF export with charts and criteria
+- [x] Test all features with both languages
+- [x] Save checkpoint
