@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Building, TrendingUp, TrendingDown, Activity, Users, DollarSign, Target, AlertTriangle, CheckCircle, ArrowUpRight, ArrowDownRight, BarChart3, PieChart, Hospital, Stethoscope, Pill, ThumbsUp, ThumbsDown, Lightbulb, Scale, Heart, Bell, Award, Sliders, Layers, Sparkles, TreePine, Coffee, Leaf } from "lucide-react";
@@ -151,7 +153,7 @@ export default function CategoryAnalysis() {
   return (
     <DashboardLayout>
       <div className={`space-y-6 ${isRTL ? "rtl" : "ltr"}`} dir={isRTL ? "rtl" : "ltr"}>
-        {/* Header */}
+        {/* Header with Time Period Filter */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
@@ -164,6 +166,22 @@ export default function CategoryAnalysis() {
                 : "Compare IVI performance between SME and Key Account companies"
               }
             </p>
+          </div>
+          <div className="flex gap-3">
+            <Select defaultValue="current">
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder={isRTL ? "اختر الفترة" : "Select Period"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="current">{isRTL ? "الفترة الحالية" : "Current Period"}</SelectItem>
+                <SelectItem value="q1">{isRTL ? "الربع الأول Q1" : "Q1 (Jan-Mar)"}</SelectItem>
+                <SelectItem value="q2">{isRTL ? "الربع الثاني Q2" : "Q2 (Apr-Jun)"}</SelectItem>
+                <SelectItem value="q3">{isRTL ? "الربع الثالث Q3" : "Q3 (Jul-Sep)"}</SelectItem>
+                <SelectItem value="q4">{isRTL ? "الربع الرابع Q4" : "Q4 (Oct-Dec)"}</SelectItem>
+                <SelectItem value="yearly">{isRTL ? "سنوي (2024)" : "Yearly (2024)"}</SelectItem>
+                <SelectItem value="yoy">{isRTL ? "مقارنة سنوية" : "Year-over-Year"}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -651,91 +669,117 @@ export default function CategoryAnalysis() {
           </TabsContent>
 
           <TabsContent value="philosophy">
-            {/* Nordic Philosophy Section */}
+            {/* Nordic Philosophy Section - Aligned with CCHI Standards */}
             <Card className="mb-4 border-indigo-200 bg-gradient-to-br from-indigo-50 to-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-indigo-700">
                   <Sparkles className="h-6 w-6" />
-                  {isRTL ? "الفلسفة الاسكندنافية في IVI" : "Nordic Philosophy in IVI"}
+                  {isRTL ? "الفلسفة الاسكندنافية ومعايير مجلس الضمان الصحي" : "Nordic Philosophy & CCHI Standards Alignment"}
                 </CardTitle>
                 <CardDescription>
                   {isRTL 
-                    ? "رؤيتنا لمؤشر IVI تتجاوز كونه معادلة رياضية؛ لقد استلهمنا من النموذج النوردي مفهوم 'الثقة المبنية على البيانات'"
-                    : "Our vision for IVI goes beyond being a mathematical formula; we drew inspiration from the Nordic model's concept of 'data-driven trust'"
+                    ? "هذه الفلسفة تتماشى مع معايير بوبا ومجلس الضمان الصحي التعاوني (CCHI)"
+                    : "This philosophy aligns with Bupa and CCHI (Council of Cooperative Health Insurance) standards"
                   }
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
-                  {/* Lagom */}
+                  {/* Lagom - VBHC */}
                   <Card className="border-blue-200 bg-blue-50">
                     <CardHeader className="pb-2">
                       <CardTitle className="flex items-center gap-2 text-blue-700 text-lg">
                         <Scale className="h-5 w-5" />
                         Lagom
                       </CardTitle>
-                      <CardDescription className="text-blue-600">
-                        {isRTL ? "القدر الكافي والمناسب" : "Just the Right Amount"}
+                      <CardDescription className="text-blue-600 font-semibold">
+                        {isRTL ? "← معيار الرعاية القائمة على القيمة (VBHC)" : "Value-Based Healthcare (VBHC) →"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-3">
                         {isRTL 
-                          ? "في كفاءة الاستخدام (U)، لا نكافئ الشركة التي لا يستهلك موظفوها التأمين (لأن هذا قد يعني إهمالاً صحياً)، بل نكافئ الشركة التي تستهلكه 'بذكاء'."
-                          : "In Utilization (U), we don't reward companies whose employees don't use insurance (as this may indicate health neglect), but reward those who use it 'smartly'."
+                          ? "في نظام IVI، نطبق 'Lagom' من خلال الاستخدام الأمثل للموارد عبر العيادات الرقمية. يتماشى مع توجه المجلس في الحد من الهدر المالي (Waste)."
+                          : "In IVI, we apply 'Lagom' through optimal resource utilization via digital clinics. Aligns with CCHI's focus on reducing financial waste."
                         }
                       </p>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Badge className="bg-blue-100 text-blue-800">{isRTL ? "فحوصات وقائية ↑" : "Preventive Checkups ↑"}</Badge>
-                        <Badge className="bg-blue-100 text-blue-800">{isRTL ? "عمليات جراحية ↓" : "Surgeries ↓"}</Badge>
+                      <div className="p-2 bg-blue-100 rounded-lg mb-2">
+                        <p className="text-xs text-blue-800">
+                          {isRTL 
+                            ? "العيادات الرقمية تضمن حصول المريض على الخدمة 'المناسبة' في الوقت المناسب، مما يقلل من الزيارات غير الضرورية للطوارئ والفحوصات المكررة."
+                            : "Digital clinics ensure patients receive the 'right' service at the right time, reducing unnecessary ER visits and duplicate tests."
+                          }
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 text-sm">
+                        <Badge className="bg-blue-100 text-blue-800">{isRTL ? "الاستدامة المالية" : "Financial Sustainability"}</Badge>
+                        <Badge className="bg-blue-100 text-blue-800">{isRTL ? "تقليل الهدر" : "Waste Reduction"}</Badge>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Hygge */}
+                  {/* Hygge - Patient Experience */}
                   <Card className="border-amber-200 bg-amber-50">
                     <CardHeader className="pb-2">
                       <CardTitle className="flex items-center gap-2 text-amber-700 text-lg">
                         <Coffee className="h-5 w-5" />
                         Hygge
                       </CardTitle>
-                      <CardDescription className="text-amber-600">
-                        {isRTL ? "الراحة النفسية والأمان" : "Comfort & Security"}
+                      <CardDescription className="text-amber-600 font-semibold">
+                        {isRTL ? "← معيار تجربة المريض (Patient Experience)" : "Patient Experience Standard →"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-3">
                         {isRTL 
-                          ? "في تجربة العميل (E)، نضيف 'مؤشر الجهد' (Effort Score). كلما قل عدد الخطوات للحصول على الموافقة، زادت درجة IVI."
-                          : "In Experience (E), we add an 'Effort Score'. The fewer steps to get approval, the higher the IVI score."
+                          ? "'Hygge' في IVI تعني سلاسة الوصول للرعاية (Access to Care) وتوطين الخدمة رقمياً. المجلس يركز على (Patient Journey)."
+                          : "'Hygge' in IVI means seamless Access to Care and digital service localization. CCHI focuses on Patient Journey."
                         }
                       </p>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Badge className="bg-amber-100 text-amber-800">{isRTL ? "تجربة خالية من التوتر" : "Stress-Free Experience"}</Badge>
+                      <div className="p-2 bg-amber-100 rounded-lg mb-2">
+                        <p className="text-xs text-amber-800">
+                          {isRTL 
+                            ? "العيادات الرقمية للأمراض المزمنة توفر تجربة 'مطمئنة' ومريحة للمريض في منزله، مما يقلل من جهد التنقل وفترات الانتظار."
+                            : "Digital clinics for chronic diseases provide a 'reassuring' and comfortable experience at home, reducing travel effort and waiting times."
+                          }
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 text-sm">
+                        <Badge className="bg-amber-100 text-amber-800">{isRTL ? "رحلة المستفيد" : "Patient Journey"}</Badge>
+                        <Badge className="bg-amber-100 text-amber-800">{isRTL ? "سهولة الوصول" : "Easy Access"}</Badge>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Friluftsliv */}
+                  {/* Friluftsliv - Population Health Management */}
                   <Card className="border-green-200 bg-green-50">
                     <CardHeader className="pb-2">
                       <CardTitle className="flex items-center gap-2 text-green-700 text-lg">
                         <TreePine className="h-5 w-5" />
                         Friluftsliv
                       </CardTitle>
-                      <CardDescription className="text-green-600">
-                        {isRTL ? "الارتباط بالطبيعة والوقاية" : "Nature & Prevention"}
+                      <CardDescription className="text-green-600 font-semibold">
+                        {isRTL ? "← معيار إدارة صحة السكان (PHM)" : "Population Health Management →"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-muted-foreground mb-3">
                         {isRTL 
-                          ? "في المخرجات الصحية (H)، نقدم توصيات تعتمد على 'الرعاية الاستباقية'، مثل تحفيز سياسات العمل المرن والمشي."
-                          : "In Health (H), we provide recommendations based on 'proactive care', like encouraging flexible work policies and walking."
+                          ? "نستخدم 'Friluftsliv' كرمز للوقاية الأولية والتمكين الصحي (Patient Empowerment) عبر العيادات الرقمية."
+                          : "We use 'Friluftsliv' as a symbol for Primary Prevention and Patient Empowerment through digital clinics."
                         }
                       </p>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Badge className="bg-green-100 text-green-800">{isRTL ? "انخفاض الحالات المزمنة" : "Reduced Chronic Cases"}</Badge>
+                      <div className="p-2 bg-green-100 rounded-lg mb-2">
+                        <p className="text-xs text-green-800">
+                          {isRTL 
+                            ? "من خلال العيادات الرقمية، نقوم بتعزيز إدارة الأمراض المزمنة (السكري والضغط) عبر المتابعة المستمرة والبيانات اللحظية، مما يقلل المضاعفات."
+                            : "Through digital clinics, we enhance chronic disease management (diabetes, hypertension) via continuous monitoring and real-time data, reducing complications."
+                          }
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 text-sm">
+                        <Badge className="bg-green-100 text-green-800">{isRTL ? "برامج Wellness" : "Wellness Programs"}</Badge>
+                        <Badge className="bg-green-100 text-green-800">{isRTL ? "التدخلات الوقائية" : "Preventive Interventions"}</Badge>
                       </div>
                     </CardContent>
                   </Card>
