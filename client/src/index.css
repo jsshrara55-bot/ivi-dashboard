@@ -42,20 +42,20 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Swiss Style Color Palette */
+/* Bupa Arabia Brand Color Palette */
 :root {
-  --primary: oklch(0.45 0.25 260); /* Deep Blue */
+  --primary: oklch(0.52 0.15 220); /* Bupa Blue #0079C8 */
   --primary-foreground: oklch(1 0 0);
   
-  --sidebar-primary: oklch(0.45 0.25 260);
+  --sidebar-primary: oklch(0.52 0.15 220); /* Bupa Blue */
   --sidebar-primary-foreground: oklch(1 0 0);
   
-  /* Swiss Style Accents */
-  --chart-1: oklch(0.6 0.2 250); /* Blue */
-  --chart-2: oklch(0.6 0.2 20);  /* Red */
-  --chart-3: oklch(0.85 0.18 85); /* Yellow */
-  --chart-4: oklch(0.5 0.15 140); /* Green */
-  --chart-5: oklch(0.4 0.1 280); /* Purple */
+  /* Bupa Brand Accents */
+  --chart-1: oklch(0.52 0.15 220); /* Bupa Blue #0079C8 */
+  --chart-2: oklch(0.55 0.12 175); /* Bupa Teal #008385 */
+  --chart-3: oklch(0.7 0.15 175);  /* Bupa Light Teal #6ECEB2 */
+  --chart-4: oklch(0.8 0.15 85);   /* Bupa Gold #FFB81C */
+  --chart-5: oklch(0.55 0.2 20);   /* Bupa Red #E31837 */
   
   --radius: 0rem; /* Sharp corners for Swiss Style */
   
@@ -93,10 +93,10 @@
 }
 
 .dark {
-  --primary: oklch(0.6 0.2 250);
+  --primary: oklch(0.6 0.15 220); /* Bupa Blue Light */
   --primary-foreground: oklch(1 0 0);
   
-  --sidebar-primary: oklch(0.6 0.2 250);
+  --sidebar-primary: oklch(0.6 0.15 220); /* Bupa Blue Light */
   --sidebar-primary-foreground: oklch(1 0 0);
   
   --background: oklch(0.1 0 0);
@@ -124,11 +124,11 @@
   --input: oklch(0.25 0 0);
   --ring: oklch(0.8 0 0);
   
-  --chart-1: oklch(0.6 0.2 250);
-  --chart-2: oklch(0.6 0.2 20);
-  --chart-3: oklch(0.85 0.18 85);
-  --chart-4: oklch(0.5 0.15 140);
-  --chart-5: oklch(0.4 0.1 280);
+  --chart-1: oklch(0.6 0.15 220);  /* Bupa Blue Light */
+  --chart-2: oklch(0.6 0.12 175);  /* Bupa Teal Light */
+  --chart-3: oklch(0.75 0.15 175); /* Bupa Light Teal */
+  --chart-4: oklch(0.85 0.15 85);  /* Bupa Gold Light */
+  --chart-5: oklch(0.6 0.2 20);    /* Bupa Red Light */
   
   --sidebar: oklch(0.15 0 0);
   --sidebar-foreground: oklch(0.98 0 0);

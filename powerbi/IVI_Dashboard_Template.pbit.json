@@ -1,0 +1,182 @@
+{
+  "name": "IVI Dashboard - Bupa Arabia",
+  "version": "1.0.0",
+  "description": "Power BI Template for Intelligent Value Index (IVI) Dashboard",
+  "author": "Team: Ghada, Shahad, Afnan, Yamama, Razan",
+  "created": "2026-01-21",
+  "dataModel": {
+    "tables": [
+      {
+        "name": "CorporateClients",
+        "columns": [
+          {"name": "ContNo", "dataType": "string", "description": "Contract Number"},
+          {"name": "CompanyName", "dataType": "string", "description": "Company Name"},
+          {"name": "Sector", "dataType": "string", "description": "Industry Sector"},
+          {"name": "Region", "dataType": "string", "description": "Geographic Region"},
+          {"name": "EmployeeCount", "dataType": "int64", "description": "Number of Employees"},
+          {"name": "PremiumAmount", "dataType": "decimal", "description": "Annual Premium"},
+          {"name": "ContractStartDate", "dataType": "datetime", "description": "Contract Start Date"},
+          {"name": "ContractEndDate", "dataType": "datetime", "description": "Contract End Date"}
+        ]
+      },
+      {
+        "name": "IVIScores",
+        "columns": [
+          {"name": "ContNo", "dataType": "string", "description": "Contract Number"},
+          {"name": "HScore", "dataType": "decimal", "description": "Health Outcomes Score (0-100)"},
+          {"name": "EScore", "dataType": "decimal", "description": "Experience Quality Score (0-100)"},
+          {"name": "UScore", "dataType": "decimal", "description": "Utilization Efficiency Score (0-100)"},
+          {"name": "IVIScore", "dataType": "decimal", "description": "Overall IVI Score"},
+          {"name": "RiskCategory", "dataType": "string", "description": "Risk Category (Low/Medium/High)"},
+          {"name": "CalculatedAt", "dataType": "datetime", "description": "Calculation Timestamp"}
+        ]
+      },
+      {
+        "name": "Claims",
+        "columns": [
+          {"name": "ClaimId", "dataType": "string", "description": "Claim ID"},
+          {"name": "ContNo", "dataType": "string", "description": "Contract Number"},
+          {"name": "MemberId", "dataType": "string", "description": "Member ID"},
+          {"name": "ClaimDate", "dataType": "datetime", "description": "Claim Date"},
+          {"name": "ClaimAmount", "dataType": "decimal", "description": "Claim Amount"},
+          {"name": "ApprovedAmount", "dataType": "decimal", "description": "Approved Amount"},
+          {"name": "Status", "dataType": "string", "description": "Claim Status"},
+          {"name": "ClaimType", "dataType": "string", "description": "Type of Claim"},
+          {"name": "ProviderId", "dataType": "string", "description": "Provider ID"}
+        ]
+      },
+      {
+        "name": "Predictions",
+        "columns": [
+          {"name": "ContNo", "dataType": "string", "description": "Contract Number"},
+          {"name": "PredictedIVI", "dataType": "decimal", "description": "Predicted IVI Score"},
+          {"name": "RetentionProbability", "dataType": "decimal", "description": "Retention Probability (%)"},
+          {"name": "ChurnRisk", "dataType": "string", "description": "Churn Risk Level"},
+          {"name": "PredictionDate", "dataType": "datetime", "description": "Prediction Date"},
+          {"name": "ConfidenceLevel", "dataType": "decimal", "description": "Model Confidence (%)"}
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "fromTable": "IVIScores",
+        "fromColumn": "ContNo",
+        "toTable": "CorporateClients",
+        "toColumn": "ContNo",
+        "cardinality": "manyToOne"
+      },
+      {
+        "fromTable": "Claims",
+        "fromColumn": "ContNo",
+        "toTable": "CorporateClients",
+        "toColumn": "ContNo",
+        "cardinality": "manyToOne"
+      },
+      {
+        "fromTable": "Predictions",
+        "fromColumn": "ContNo",
+        "toTable": "CorporateClients",
+        "toColumn": "ContNo",
+        "cardinality": "manyToOne"
+      }
+    ],
+    "measures": [
+      {
+        "name": "Average IVI Score",
+        "expression": "AVERAGE(IVIScores[IVIScore])",
+        "formatString": "0.0"
+      },
+      {
+        "name": "High Risk Count",
+        "expression": "COUNTROWS(FILTER(IVIScores, IVIScores[RiskCategory] = \"High\"))",
+        "formatString": "0"
+      },
+      {
+        "name": "Total Premium",
+        "expression": "SUM(CorporateClients[PremiumAmount])",
+        "formatString": "SAR #,##0"
+      },
+      {
+        "name": "Average Retention Rate",
+        "expression": "AVERAGE(Predictions[RetentionProbability])",
+        "formatString": "0.0%"
+      },
+      {
+        "name": "Claims Approval Rate",
+        "expression": "DIVIDE(COUNTROWS(FILTER(Claims, Claims[Status] = \"Approved\")), COUNTROWS(Claims))",
+        "formatString": "0.0%"
+      },
+      {
+        "name": "IVI Improvement YoY",
+        "expression": "VAR CurrentYear = CALCULATE(AVERAGE(IVIScores[IVIScore]), YEAR(IVIScores[CalculatedAt]) = YEAR(TODAY())) VAR PreviousYear = CALCULATE(AVERAGE(IVIScores[IVIScore]), YEAR(IVIScores[CalculatedAt]) = YEAR(TODAY()) - 1) RETURN CurrentYear - PreviousYear",
+        "formatString": "+0.0;-0.0;0.0"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "name": "Executive Overview",
+      "displayName": "النظرة التنفيذية | Executive Overview",
+      "visuals": [
+        {"type": "card", "title": "Total Clients", "measure": "COUNTROWS(CorporateClients)"},
+        {"type": "card", "title": "Average IVI", "measure": "Average IVI Score"},
+        {"type": "card", "title": "High Risk Clients", "measure": "High Risk Count"},
+        {"type": "card", "title": "Total Premium", "measure": "Total Premium"},
+        {"type": "donutChart", "title": "Risk Distribution", "category": "RiskCategory", "values": "Count"},
+        {"type": "lineChart", "title": "IVI Trend", "axis": "CalculatedAt", "values": "IVIScore"}
+      ]
+    },
+    {
+      "name": "IVI Components",
+      "displayName": "مكونات IVI | IVI Components",
+      "visuals": [
+        {"type": "gauge", "title": "H Score", "value": "AVERAGE(IVIScores[HScore])", "target": 70},
+        {"type": "gauge", "title": "E Score", "value": "AVERAGE(IVIScores[EScore])", "target": 70},
+        {"type": "gauge", "title": "U Score", "value": "AVERAGE(IVIScores[UScore])", "target": 70},
+        {"type": "radarChart", "title": "IVI Radar", "categories": ["H", "E", "U"], "values": "Score"},
+        {"type": "table", "title": "Component Details", "columns": ["Company", "H", "E", "U", "IVI"]}
+      ]
+    },
+    {
+      "name": "Risk Analysis",
+      "displayName": "تحليل المخاطر | Risk Analysis",
+      "visuals": [
+        {"type": "matrix", "title": "Risk Matrix", "rows": "Region", "columns": "RiskCategory", "values": "Count"},
+        {"type": "barChart", "title": "Risk by Sector", "category": "Sector", "values": "High Risk Count"},
+        {"type": "scatterChart", "title": "IVI vs Premium", "xAxis": "PremiumAmount", "yAxis": "IVIScore", "legend": "RiskCategory"}
+      ]
+    },
+    {
+      "name": "Predictions",
+      "displayName": "التنبؤات | Predictions",
+      "visuals": [
+        {"type": "card", "title": "Avg Retention Rate", "measure": "Average Retention Rate"},
+        {"type": "lineChart", "title": "IVI Forecast", "axis": "Month", "values": ["Current IVI", "Predicted IVI"]},
+        {"type": "table", "title": "At-Risk Clients", "columns": ["Company", "Current IVI", "Predicted IVI", "Churn Risk"]}
+      ]
+    },
+    {
+      "name": "Claims Analysis",
+      "displayName": "تحليل المطالبات | Claims Analysis",
+      "visuals": [
+        {"type": "card", "title": "Total Claims", "measure": "COUNTROWS(Claims)"},
+        {"type": "card", "title": "Approval Rate", "measure": "Claims Approval Rate"},
+        {"type": "pieChart", "title": "Claims by Status", "category": "Status", "values": "Count"},
+        {"type": "barChart", "title": "Claims by Type", "category": "ClaimType", "values": "ClaimAmount"}
+      ]
+    }
+  ],
+  "theme": {
+    "name": "Bupa Arabia Theme",
+    "colors": [
+      "#00A9E0",
+      "#003087",
+      "#6ECEB2",
+      "#FFB81C",
+      "#E31837",
+      "#7C878E"
+    ],
+    "background": "#FFFFFF",
+    "foreground": "#003087"
+  }
+}

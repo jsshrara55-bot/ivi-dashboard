@@ -191,8 +191,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         )}>
           <div className={cn("flex h-16 shrink-0 items-center", isRTL && "flex-row-reverse")}>
             <div className={cn("flex items-center gap-2 font-bold text-xl text-primary", isRTL && "flex-row-reverse")}>
-              <Activity className="h-8 w-8" />
-              <span>{isRTL ? 'لوحة IVI' : 'IVI Dashboard'}</span>
+              <img src="/bupa-logo.png" alt="Bupa" className="h-8 w-auto" />
+              <span className="text-sm">{isRTL ? 'لوحة IVI' : 'IVI'}</span>
             </div>
           </div>
           <SidebarContent />
@@ -205,8 +205,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex grow flex-col gap-y-5 overflow-y-auto px-6 pb-4 h-full">
             <div className={cn("flex h-16 shrink-0 items-center justify-between", isRTL && "flex-row-reverse")}>
               <div className={cn("flex items-center gap-2 font-bold text-xl text-primary", isRTL && "flex-row-reverse")}>
-                <Activity className="h-8 w-8" />
-                <span>{isRTL ? 'لوحة IVI' : 'IVI Dashboard'}</span>
+                <img src="/bupa-logo.png" alt="Bupa" className="h-8 w-auto" />
+                <span className="text-sm">{isRTL ? 'لوحة IVI' : 'IVI'}</span>
               </div>
             </div>
             <SidebarContent onLinkClick={() => setIsMobileMenuOpen(false)} />
@@ -238,8 +238,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Mobile logo */}
             <div className="flex items-center lg:hidden">
               <div className={cn("flex items-center gap-2 font-bold text-lg text-primary", isRTL && "flex-row-reverse")}>
-                <Activity className="h-6 w-6" />
-                <span className="hidden sm:inline">{isRTL ? 'لوحة IVI' : 'IVI Dashboard'}</span>
+                <img src="/bupa-logo.png" alt="Bupa" className="h-6 w-auto" />
+                <span className="hidden sm:inline text-sm">{isRTL ? 'لوحة IVI' : 'IVI'}</span>
               </div>
             </div>
             
