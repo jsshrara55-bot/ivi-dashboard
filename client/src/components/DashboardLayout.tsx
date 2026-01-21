@@ -93,9 +93,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </ul>
         </li>
 
-        {/* Admin Section - Visible to all authenticated users */}
-        {isAuthenticated && (
-          <li>
+        {/* Admin Section - Visible to all users */}
+        <li>
             <div className={cn(
               "text-xs font-semibold leading-6 text-sidebar-foreground/60 uppercase tracking-wider",
               isRTL && "text-right"
@@ -129,7 +128,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               ))}
             </ul>
           </li>
-        )}
 
         {/* User Section */}
         <li className="mt-auto">
@@ -250,21 +248,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* Language Toggle */}
               <LanguageToggle />
               
-              {/* Notification Bell */}
-              {isAuthenticated && <NotificationBell />}
+              {/* Notification Bell - visible to all */}
+              <NotificationBell />
               
-              {/* Mobile user info */}
-              <div className="lg:hidden flex items-center gap-2">
-                {isAuthenticated ? (
+              {/* Mobile user info - only show logout if authenticated */}
+              {isAuthenticated && (
+                <div className="lg:hidden flex items-center gap-2">
                   <Button variant="ghost" size="sm" onClick={handleLogout}>
                     <LogOut className="h-4 w-4" />
                   </Button>
-                ) : (
-                  <Button variant="outline" size="sm" onClick={() => window.location.href = getLoginUrl()}>
-                    {t('common.signIn')}
-                  </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
