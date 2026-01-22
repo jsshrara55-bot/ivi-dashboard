@@ -28,6 +28,7 @@ import CategoryAnalysis from "./pages/CategoryAnalysis";
 import PresentationReport from "./pages/PresentationReport";
 import BeforeAfterComparison from "./pages/BeforeAfterComparison";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+import About from "./pages/About";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -56,6 +57,7 @@ function Router() {
       <Route path={"/presentation-report"} component={PresentationReport} />
       <Route path={"/before-after"} component={BeforeAfterComparison} />
       <Route path={"/executive"} component={ExecutiveDashboard} />
+      <Route path={"/about"} component={About} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

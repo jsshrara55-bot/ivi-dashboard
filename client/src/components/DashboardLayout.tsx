@@ -1,6 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { Activity, BarChart3, Database, GitCompare, Layers, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users, Upload, Bell, Menu, ClipboardCheck, FileText, Calculator, Building2, Building, Hospital, PieChart, Presentation, ArrowLeftRight, Gauge } from "lucide-react";
+import { Activity, BarChart3, Database, GitCompare, Layers, LayoutDashboard, LogOut, Settings, Shield, ShieldCheck, Users, Upload, Bell, Menu, ClipboardCheck, FileText, Calculator, Building2, Building, Hospital, PieChart, Presentation, ArrowLeftRight, Gauge, Info } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 import { Button } from "./ui/button";
@@ -46,6 +46,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: isRTL ? 'تقرير العرض' : 'Presentation', href: '/presentation-report', icon: Presentation },
     { name: isRTL ? 'مقارنة قبل/بعد' : 'Before/After', href: '/before-after', icon: ArrowLeftRight },
     { name: isRTL ? 'لوحة تنفيذية' : 'Executive', href: '/executive', icon: Gauge },
+    { name: isRTL ? 'حول المشروع' : 'About', href: '/about', icon: Info },
   ];
 
   // Admin-only navigation items
