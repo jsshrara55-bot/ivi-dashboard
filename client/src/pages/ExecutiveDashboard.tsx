@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -41,6 +41,8 @@ import {
 } from "recharts";
 
 import { trpc } from "@/lib/trpc";
+import KPINotifications, { generateKPIAlerts, KPIAlert } from "@/components/KPINotifications";
+import { toast } from "sonner";
 
 export default function ExecutiveDashboard() {
   const { language } = useLanguage();
@@ -126,6 +128,60 @@ export default function ExecutiveDashboard() {
       count: metrics.keyAccountCount
     }
   ];
+  
+  // KPI Alerts state
+  const [kpiAlerts, setKpiAlerts] = useState<KPIAlert[]>([]);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  
+  // Generate KPI alerts based on current metrics
+  useEffect(() => {
+    if (iviScoresData && iviScoresData.length > 0) {
+      // Simulate previous values for comparison (in real app, fetch from history)
+      const previousIVI = Number(metrics.avgIVI) + (Math.random() * 10 - 5);
+      const previousHighRisk = metrics.highRisk - Math.floor(Math.random() * 3);
+      
+      // Get sample companies with risk changes
+      const companiesWithChanges = iviScoresData.slice(0, 5).map((c, idx) => ({
+        name: c.companyName || `Company ${c.contNo}`,
+        iviScore: Number(c.iviScore),
+        riskCategory: c.riskCategory || 'Medium',
+        previousRisk: idx < 2 ? 'Medium' : undefined // Simulate some risk changes
+      }));
+      
+      const alerts = generateKPIAlerts({
+        avgIVI: Number(metrics.avgIVI),
+        previousIVI,
+        highRiskCount: metrics.highRisk,
+        previousHighRisk,
+        retentionRate: Number(metrics.retentionRate),
+        companies: companiesWithChanges
+      });
+      
+      setKpiAlerts(alerts);
+    }
+  }, [iviScoresData, metrics, lastRefresh]);
+  
+  // Auto-refresh alerts every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLastRefresh(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  const handleDismissAlert = useCallback((id: string) => {
+    setKpiAlerts(prev => prev.filter(a => a.id !== id));
+  }, []);
+  
+  const handleDismissAllAlerts = useCallback(() => {
+    setKpiAlerts([]);
+    toast.success(isRTL ? 'تم مسح جميع التنبيهات' : 'All alerts cleared');
+  }, [isRTL]);
+  
+  const handleRefreshAlerts = useCallback(() => {
+    setLastRefresh(new Date());
+    toast.info(isRTL ? 'جاري تحديث التنبيهات...' : 'Refreshing alerts...');
+  }, [isRTL]);
   
   const timePeriodOptions = [
     { value: 'current', label: isRTL ? 'الحالي' : 'Current' },
@@ -565,6 +621,16 @@ export default function ExecutiveDashboard() {
             </CardContent>
           </Card>
         </div>
+      </div>
+      
+      {/* Real-time KPI Notifications */}
+      <div className="mt-6">
+        <KPINotifications
+          alerts={kpiAlerts}
+          onDismiss={handleDismissAlert}
+          onDismissAll={handleDismissAllAlerts}
+          onRefresh={handleRefreshAlerts}
+        />
       </div>
       
       {/* Footer */}
