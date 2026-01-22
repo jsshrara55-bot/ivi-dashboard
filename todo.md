@@ -93,7 +93,7 @@
 ## Phase 13: Advanced Features
 - [x] Add interactive charts to Risk Alerts page (trend over time)
 - [x] Add Excel export to Clients page with applied filters
-- [x] Set up automatic email notifications for risk alerts (using Manus notification system)
+- [x] Set up automatic email notifications for risk alerts (using notification system)
 - [x] Test all new features
 
 ## Phase 14: Scheduled Notifications
@@ -305,7 +305,7 @@
 - [x] تجميع ملف ZIP شامل مع الأكواد
 
 ## Phase 35: Fix Errors & Remove Auth Requirement
-- [x] Fix production error (unexpected error on ividash.manus.space)
+- [x] Fix production error (unexpected error on production)
 - [x] Remove sign-in requirement - make all pages public
 - [x] Test and verify all pages work without authentication
 
@@ -316,3 +316,8 @@
 - [x] Update team names to English (Ghada, Shahad, Afnan, Yamama, Razan)
 - [x] Update final report with new branding
 - [x] Create complete ZIP package with all files
+
+## Phase 37: Remove Signatures
+- [x] Search for all references in code
+- [x] Remove signatures from all files
+- [x] Update and save checkpoint
