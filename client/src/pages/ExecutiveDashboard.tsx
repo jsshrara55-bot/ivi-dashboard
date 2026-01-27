@@ -374,7 +374,7 @@ export default function ExecutiveDashboard() {
       
       <div id="executive-dashboard-content">
         {/* Main KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 mb-6">
           <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
             <CardContent className="p-6">
               <div className={cn("flex items-center justify-between", isRTL && "flex-row-reverse")}>

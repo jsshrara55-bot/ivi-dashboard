@@ -23,10 +23,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isTablet, setIsTablet] = useState(false);
   const { t, isRTL } = useLanguage();
 
-  // Detect tablet viewport
+  // Detect tablet viewport - now treat tablet same as desktop
   useEffect(() => {
     const checkTablet = () => {
       const width = window.innerWidth;
+      // Tablet now shows full sidebar like desktop (no collapsing)
       setIsTablet(width >= 768 && width <= 1024);
     };
     checkTablet();
@@ -204,37 +205,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop & Tablet Sidebar */}
+      {/* Desktop & Tablet Sidebar - Full width on both */}
       <div className={cn(
         "hidden md:fixed md:inset-y-0 md:z-50 md:flex md:flex-col transition-all duration-300",
-        isTablet && isTabletSidebarCollapsed ? "md:w-16" : "md:w-72 lg:w-72",
+        "md:w-64 lg:w-72",
         isRTL ? "md:right-0" : "md:left-0"
       )}>
         <div className={cn(
-          "flex grow flex-col gap-y-5 overflow-y-auto bg-sidebar pb-4 transition-all duration-300",
-          isTablet && isTabletSidebarCollapsed ? "px-2" : "px-6",
+          "flex grow flex-col gap-y-5 overflow-y-auto bg-sidebar pb-4 transition-all duration-300 px-4 lg:px-6",
           isRTL ? "border-l border-sidebar-border" : "border-r border-sidebar-border"
         )}>
-          <div className={cn("flex h-16 shrink-0 items-center justify-between", isRTL && "flex-row-reverse")}>
+          <div className={cn("flex h-16 shrink-0 items-center", isRTL && "flex-row-reverse")}>
             <div className={cn("flex items-center gap-2 font-bold text-xl text-primary", isRTL && "flex-row-reverse")}>
-              <img src="/bupa-logo.png" alt="Bupa" className="h-8 w-auto" />
-              {!(isTablet && isTabletSidebarCollapsed) && (
-                <span className="text-sm">{isRTL ? 'لوحة IVI' : 'IVI'}</span>
-              )}
+              <img src="/bupa-logo.png" alt="Bupa" className="h-10 w-auto" />
+              <span className="text-base lg:text-lg">{isRTL ? 'لوحة IVI' : 'IVI Dashboard'}</span>
             </div>
-            {/* Tablet collapse toggle */}
-            {isTablet && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTabletSidebar}
-                className="h-8 w-8"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            )}
           </div>
-          <SidebarContent isCollapsed={isTablet && isTabletSidebarCollapsed} />
+          <SidebarContent isCollapsed={false} />
         </div>
       </div>
 
@@ -256,9 +243,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className={cn(
         "transition-all duration-300",
-        isTablet && isTabletSidebarCollapsed 
-          ? (isRTL ? "md:pr-16" : "md:pl-16")
-          : (isRTL ? "md:pr-72" : "md:pl-72")
+        isRTL ? "md:pr-64 lg:pr-72" : "md:pl-64 lg:pl-72"
       )}>
         {/* Top header with notifications */}
         <header className={cn(

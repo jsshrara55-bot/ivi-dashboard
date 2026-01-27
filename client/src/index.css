@@ -207,10 +207,11 @@
   }
 }
 
-/* Tablet & iPad Responsive Styles */
+/* Tablet & iPad Responsive Styles - Full Desktop Experience */
 @layer utilities {
-  /* Tablet breakpoint: 768px - 1024px */
+  /* Tablet breakpoint: 768px - 1024px - Same as Desktop */
   @media (min-width: 768px) and (max-width: 1024px) {
+    /* Keep same grid as desktop */
     .tablet\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -219,21 +220,38 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
     
-    .tablet\:text-sm {
-      font-size: 0.875rem;
-      line-height: 1.25rem;
+    .tablet\:grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
     
-    .tablet\:p-4 {
-      padding: 1rem;
+    /* Keep same font sizes as desktop */
+    .tablet\:text-base {
+      font-size: 1rem;
+      line-height: 1.5rem;
     }
     
-    .tablet\:gap-3 {
-      gap: 0.75rem;
+    .tablet\:text-lg {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
     }
     
-    .tablet\:sidebar-collapsed {
-      width: 4rem;
+    /* Keep same padding as desktop */
+    .tablet\:p-6 {
+      padding: 1.5rem;
+    }
+    
+    .tablet\:gap-4 {
+      gap: 1rem;
+    }
+    
+    .tablet\:gap-6 {
+      gap: 1.5rem;
+    }
+    
+    /* Icons same size as desktop */
+    .tablet\:icon-lg {
+      width: 1.5rem;
+      height: 1.5rem;
     }
   }
   
