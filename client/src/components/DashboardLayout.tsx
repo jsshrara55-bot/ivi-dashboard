@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { LanguageToggle } from "./LanguageToggle";
 import { Toaster } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Sheet, SheetContent } from "./ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -19,7 +19,24 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [location] = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isTabletSidebarCollapsed, setIsTabletSidebarCollapsed] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   const { t, isRTL } = useLanguage();
+
+  // Detect tablet viewport
+  useEffect(() => {
+    const checkTablet = () => {
+      const width = window.innerWidth;
+      setIsTablet(width >= 768 && width <= 1024);
+    };
+    checkTablet();
+    window.addEventListener('resize', checkTablet);
+    return () => window.removeEventListener('resize', checkTablet);
+  }, []);
+
+  const toggleTabletSidebar = useCallback(() => {
+    setIsTabletSidebarCollapsed(prev => !prev);
+  }, []);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -62,7 +79,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   // Sidebar content component to reuse in both desktop and mobile
-  const SidebarContent = ({ onLinkClick }: { onLinkClick?: () => void }) => (
+  const SidebarContent = ({ onLinkClick, isCollapsed = false }: { onLinkClick?: () => void; isCollapsed?: boolean }) => (
     <nav className="flex flex-1 flex-col">
       <ul role="list" className="flex flex-1 flex-col gap-y-7">
         <li>
@@ -77,8 +94,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                       : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',
                     'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
-                    isRTL && 'flex-row-reverse text-right'
+                    isCollapsed && 'justify-center px-2',
+                    isRTL && !isCollapsed && 'flex-row-reverse text-right'
                   )}
+                  title={isCollapsed ? item.name : undefined}
                 >
                   <item.icon
                     className={cn(
@@ -87,7 +106,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     )}
                     aria-hidden="true"
                   />
-                  {item.name}
+                  {!isCollapsed && item.name}
                 </Link>
               </li>
             ))}
@@ -96,12 +115,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Admin Section - Visible to all users */}
         <li>
-            <div className={cn(
-              "text-xs font-semibold leading-6 text-sidebar-foreground/60 uppercase tracking-wider",
-              isRTL && "text-right"
-            )}>
-              {t('common.administration')}
-            </div>
+            {!isCollapsed && (
+              <div className={cn(
+                "text-xs font-semibold leading-6 text-sidebar-foreground/60 uppercase tracking-wider",
+                isRTL && "text-right"
+              )}>
+                {t('common.administration')}
+              </div>
+            )}
             <ul role="list" className="-mx-2 mt-2 space-y-1">
               {adminNavigation.map((item) => (
                 <li key={item.href}>
@@ -113,8 +134,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',
                       'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
-                      isRTL && 'flex-row-reverse text-right'
+                      isCollapsed && 'justify-center px-2',
+                      isRTL && !isCollapsed && 'flex-row-reverse text-right'
                     )}
+                    title={isCollapsed ? item.name : undefined}
                   >
                     <item.icon
                       className={cn(
@@ -123,7 +146,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       )}
                       aria-hidden="true"
                     />
-                    {item.name}
+                    {!isCollapsed && item.name}
                   </Link>
                 </li>
               ))}
@@ -181,28 +204,43 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop Sidebar */}
+      {/* Desktop & Tablet Sidebar */}
       <div className={cn(
-        "hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col",
-        isRTL ? "lg:right-0" : "lg:left-0"
+        "hidden md:fixed md:inset-y-0 md:z-50 md:flex md:flex-col transition-all duration-300",
+        isTablet && isTabletSidebarCollapsed ? "md:w-16" : "md:w-72 lg:w-72",
+        isRTL ? "md:right-0" : "md:left-0"
       )}>
         <div className={cn(
-          "flex grow flex-col gap-y-5 overflow-y-auto bg-sidebar px-6 pb-4",
+          "flex grow flex-col gap-y-5 overflow-y-auto bg-sidebar pb-4 transition-all duration-300",
+          isTablet && isTabletSidebarCollapsed ? "px-2" : "px-6",
           isRTL ? "border-l border-sidebar-border" : "border-r border-sidebar-border"
         )}>
-          <div className={cn("flex h-16 shrink-0 items-center", isRTL && "flex-row-reverse")}>
+          <div className={cn("flex h-16 shrink-0 items-center justify-between", isRTL && "flex-row-reverse")}>
             <div className={cn("flex items-center gap-2 font-bold text-xl text-primary", isRTL && "flex-row-reverse")}>
               <img src="/bupa-logo.png" alt="Bupa" className="h-8 w-auto" />
-              <span className="text-sm">{isRTL ? 'لوحة IVI' : 'IVI'}</span>
+              {!(isTablet && isTabletSidebarCollapsed) && (
+                <span className="text-sm">{isRTL ? 'لوحة IVI' : 'IVI'}</span>
+              )}
             </div>
+            {/* Tablet collapse toggle */}
+            {isTablet && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTabletSidebar}
+                className="h-8 w-8"
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            )}
           </div>
-          <SidebarContent />
+          <SidebarContent isCollapsed={isTablet && isTabletSidebarCollapsed} />
         </div>
       </div>
 
-      {/* Mobile Sidebar using Sheet */}
+      {/* Mobile Sidebar using Sheet (only for phones) */}
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-        <SheetContent side={isRTL ? "right" : "left"} className="w-72 p-0 bg-sidebar border-sidebar-border">
+        <SheetContent side={isRTL ? "right" : "left"} className="w-72 p-0 bg-sidebar border-sidebar-border md:hidden">
           <div className="flex grow flex-col gap-y-5 overflow-y-auto px-6 pb-4 h-full">
             <div className={cn("flex h-16 shrink-0 items-center justify-between", isRTL && "flex-row-reverse")}>
               <div className={cn("flex items-center gap-2 font-bold text-xl text-primary", isRTL && "flex-row-reverse")}>
@@ -216,15 +254,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </Sheet>
 
       {/* Main content */}
-      <div className={cn(isRTL ? "lg:pr-72" : "lg:pl-72")}>
+      <div className={cn(
+        "transition-all duration-300",
+        isTablet && isTabletSidebarCollapsed 
+          ? (isRTL ? "md:pr-16" : "md:pl-16")
+          : (isRTL ? "md:pr-72" : "md:pl-72")
+      )}>
         {/* Top header with notifications */}
         <header className={cn(
           "sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border bg-background px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8",
           isRTL && "flex-row-reverse"
         )}>
           <div className={cn("flex flex-1 gap-x-4 self-stretch lg:gap-x-6", isRTL && "flex-row-reverse")}>
-            {/* Mobile menu button */}
-            <div className="flex items-center lg:hidden">
+            {/* Mobile menu button (phones only) */}
+            <div className="flex items-center md:hidden">
               <Button
                 variant="ghost"
                 size="icon"
@@ -236,8 +279,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </Button>
             </div>
             
-            {/* Mobile logo */}
-            <div className="flex items-center lg:hidden">
+            {/* Mobile logo (phones only) */}
+            <div className="flex items-center md:hidden">
               <div className={cn("flex items-center gap-2 font-bold text-lg text-primary", isRTL && "flex-row-reverse")}>
                 <img src="/bupa-logo.png" alt="Bupa" className="h-6 w-auto" />
                 <span className="hidden sm:inline text-sm">{isRTL ? 'لوحة IVI' : 'IVI'}</span>

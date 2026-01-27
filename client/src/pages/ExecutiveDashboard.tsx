@@ -374,7 +374,7 @@ export default function ExecutiveDashboard() {
       
       <div id="executive-dashboard-content">
         {/* Main KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
             <CardContent className="p-6">
               <div className={cn("flex items-center justify-between", isRTL && "flex-row-reverse")}>
@@ -441,7 +441,7 @@ export default function ExecutiveDashboard() {
         </div>
         
         {/* Risk Distribution & IVI Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
           {/* Risk Distribution */}
           <Card>
             <CardHeader>
@@ -535,9 +535,9 @@ export default function ExecutiveDashboard() {
         </div>
         
         {/* Category Comparison & Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {/* Category Comparison */}
-          <Card className="lg:col-span-2">
+          <Card className="md:col-span-2">
             <CardHeader>
               <CardTitle className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}>
                 <Building2 className="h-5 w-5 text-indigo-500" />

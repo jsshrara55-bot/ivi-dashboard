@@ -206,3 +206,123 @@
     @apply font-sans tracking-tight;
   }
 }
+
+/* Tablet & iPad Responsive Styles */
+@layer utilities {
+  /* Tablet breakpoint: 768px - 1024px */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .tablet\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    
+    .tablet\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    
+    .tablet\:text-sm {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+    
+    .tablet\:p-4 {
+      padding: 1rem;
+    }
+    
+    .tablet\:gap-3 {
+      gap: 0.75rem;
+    }
+    
+    .tablet\:sidebar-collapsed {
+      width: 4rem;
+    }
+  }
+  
+  /* iPad specific (portrait) */
+  @media (min-width: 768px) and (max-width: 834px) {
+    .ipad\:text-base {
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+  
+  /* iPad Pro (landscape) */
+  @media (min-width: 1024px) and (max-width: 1366px) {
+    .ipad-pro\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    
+    .ipad-pro\:grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+}
+
+/* Dashboard Tablet Optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Sidebar adjustments for tablet */
+  .sidebar-tablet {
+    width: 220px !important;
+  }
+  
+  .sidebar-tablet-collapsed {
+    width: 60px !important;
+  }
+  
+  /* Card grid for tablet */
+  .dashboard-grid-tablet {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Chart containers for tablet */
+  .chart-container-tablet {
+    min-height: 250px !important;
+    max-height: 300px !important;
+  }
+  
+  /* Table adjustments for tablet */
+  .table-tablet {
+    font-size: 0.8rem !important;
+  }
+  
+  .table-tablet th,
+  .table-tablet td {
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  /* KPI cards for tablet */
+  .kpi-card-tablet {
+    padding: 1rem !important;
+  }
+  
+  .kpi-card-tablet .kpi-value {
+    font-size: 1.5rem !important;
+  }
+  
+  .kpi-card-tablet .kpi-label {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Touch-friendly adjustments */
+@media (pointer: coarse) {
+  /* Larger touch targets */
+  button, 
+  [role="button"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for touch */
+  .touch-spacing {
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Larger checkboxes and radios */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}

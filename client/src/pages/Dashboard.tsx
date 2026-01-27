@@ -359,7 +359,7 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <label className={cn("text-sm font-medium", isRTL && "block text-right")}>{t('common.region')}</label>
                 <Select value={regionFilter} onValueChange={setRegionFilter}>
@@ -428,7 +428,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Primary KPI Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
           <KPICard 
             title={t('dashboard.totalCompanies')} 
             value={totalCompanies} 
@@ -460,7 +460,7 @@ export default function Dashboard() {
         </div>
 
         {/* Secondary KPI Cards - Data Statistics */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           <Card className="swiss-card">
             <CardHeader className={cn("flex flex-row items-center justify-between space-y-0 pb-2", isRTL && "flex-row-reverse")}>
               <CardTitle className="text-sm font-medium">{t('dashboard.totalClaims')}</CardTitle>
@@ -539,7 +539,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
               {/* Expected IVI Improvement */}
               <div className="p-4 rounded-lg bg-background border">
                 <div className={cn("flex items-center gap-2 mb-2", isRTL && "flex-row-reverse")}>
